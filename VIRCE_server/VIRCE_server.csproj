@@ -14,4 +14,8 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="MasterMemory" Version="2.4.4" />
+    </ItemGroup>
+
 </Project>
