@@ -28,4 +28,4 @@ The matching server is responsible for matching players together.
 It is responsible for the communication between the clients and the matching logic.
 
 ## LICENSE
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the GNU Lesser General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
