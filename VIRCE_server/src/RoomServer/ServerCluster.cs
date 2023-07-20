@@ -4,21 +4,24 @@ namespace VIRCE_server.RoomServer;
 
 public abstract class ServerCluster
 {
-    private List<Server> _servers;
+    private readonly List<Server> _servers;
+    private readonly List<int> _ports;
     
     protected ServerCluster()
     {
         _servers = new List<Server>();
+        _ports = new List<int>();
     }
     
     public void AddServer(Server server)
     {
         _servers.Add(server);
+        _ports.Add(server.Port);
     }
     
     public void Start()
     {
-        foreach (var server in _servers)
+        foreach (var server in _servers.Where(server => !server.IsRunning))
         {
             server.Start();
         }
@@ -26,7 +29,7 @@ public abstract class ServerCluster
     
     public void Stop()
     {
-        foreach (var server in _servers)
+        foreach (var server in _servers.Where(server => server.IsRunning))
         {
             server.Stop();
         }
@@ -43,13 +46,9 @@ public abstract class ServerCluster
         _servers.Remove(server);
     }
     
-    public void RemoveServer(int index)
-    {
-        _servers.RemoveAt(index);
-    }
     
-    public void RemoveServer(IPEndPoint localEndPoint)
+    public void RemoveServer(int port)
     {
-        _servers.RemoveAll(server => server.LocalEndPoint.Equals(localEndPoint));
+        _servers.RemoveAll(server => server.Port == port);
     }
 }
