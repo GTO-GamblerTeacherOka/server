@@ -17,6 +17,7 @@ public class ClusterManager
     
     private ClusterManager()
     {
-        
+        _lobbyCluster = new LobbyRoomCluster();
+        _miniGameCluster = new MiniGameRoomCluster();
     }
 }

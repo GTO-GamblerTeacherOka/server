@@ -5,27 +5,19 @@ namespace VIRCE_server.RoomServer;
 
 public abstract class Server
 {
-    public int Port { get; }
-    private UdpClient? _udpClient;
+    public int Port { get; private set; }
+    protected UdpClient? UdpClient;
     public bool IsRunning { get; } = false;
     public ushort RoomId { get; }
 
-    protected Server(int port)
+    protected Server()
     {
-        Port = port;
     }
 
-    public void Bind()
+    protected void Bind()
     {
-        try
-        {
-            _udpClient ??= new UdpClient(Port);
-        }
-        catch (SocketException e)
-        {
-            Console.WriteLine(e.Message);
-            throw;
-        }
+        UdpClient ??= new UdpClient();
+        Port = (UdpClient.Client.LocalEndPoint as IPEndPoint)!.Port;
     }
 
     public abstract void Start();
