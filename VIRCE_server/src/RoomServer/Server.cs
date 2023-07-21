@@ -8,6 +8,7 @@ public abstract class Server
     public int Port { get; }
     private UdpClient? _udpClient;
     public bool IsRunning { get; } = false;
+    public ushort RoomId { get; }
 
     protected Server(int port)
     {

@@ -1,4 +1,4 @@
-﻿namespace VIRCE_server;
+﻿namespace VIRCE_server.RoomServer;
 
 public class MatchingServer
 {
