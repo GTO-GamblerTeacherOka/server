@@ -16,7 +16,7 @@
     <!-- Call code generator before-build. -->
     <Target Name="MasterMemoryGen" BeforeTargets="BeforeBuild">
         <!-- Configuration of Code-Generator, `UsingNamespace`, `InputDirectory`, `OutputDirectory` and `AddImmutableConstructor`. -->
-        <MasterMemoryGenerator UsingNamespace="$(ProjectName)" InputDirectory="$(ProjectDir)" OutputDirectory="$(ProjectDir)MasterMemory" />
+        <MasterMemoryGenerator UsingNamespace="$(ProjectName).MasterMemoryDataBase" InputDirectory="$(ProjectDir)" OutputDirectory="$(ProjectDir)src/MasterMemory" />
     </Target>
 
 </Project>

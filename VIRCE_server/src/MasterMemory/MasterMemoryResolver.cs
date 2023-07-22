@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Net;
 using System;
 using VIRCE_server.DataBase;
-using VIRCE_server.Tables;
+using VIRCE_server.MasterMemoryDataBase.Tables;
 
-namespace VIRCE_server
+namespace VIRCE_server.MasterMemoryDataBase
 {
     public class MasterMemoryResolver : global::MessagePack.IFormatterResolver
     {
@@ -46,9 +46,10 @@ namespace VIRCE_server
 
         static MasterMemoryResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(1)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(2)
             {
-                {typeof(UserData[]), 0 },
+                {typeof(RoomServerInfo[]), 0 },
+                {typeof(UserData[]), 1 },
             };
         }
 
@@ -59,7 +60,8 @@ namespace VIRCE_server
 
             switch (key)
             {
-                case 0: return new MessagePack.Formatters.ArrayFormatter<UserData>();
+                case 0: return new MessagePack.Formatters.ArrayFormatter<RoomServerInfo>();
+                case 1: return new MessagePack.Formatters.ArrayFormatter<UserData>();
                 default: return null;
             }
         }

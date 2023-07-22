@@ -8,7 +8,7 @@ using System.Net;
 using System;
 using VIRCE_server.DataBase;
 
-namespace VIRCE_server.Tables
+namespace VIRCE_server.MasterMemoryDataBase.Tables
 {
    public sealed partial class UserDataTable : TableBase<UserData>, ITableUniqueValidate
    {

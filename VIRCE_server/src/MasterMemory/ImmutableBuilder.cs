@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Net;
 using System;
 using VIRCE_server.DataBase;
-using VIRCE_server.Tables;
+using VIRCE_server.MasterMemoryDataBase.Tables;
 
-namespace VIRCE_server
+namespace VIRCE_server.MasterMemoryDataBase
 {
    public sealed class ImmutableBuilder : ImmutableBuilderBase
    {
@@ -25,11 +25,47 @@ namespace VIRCE_server
             return memory;
         }
 
+        public void ReplaceAll(System.Collections.Generic.IList<RoomServerInfo> data)
+        {
+            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<int>.Default);
+            var table = new RoomServerInfoTable(newData);
+            memory = new MemoryDatabase(
+                table,
+                memory.UserDataTable
+            
+            );
+        }
+
+        public void RemoveRoomServerInfo(int[] keys)
+        {
+            var data = RemoveCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), keys, x => x.RoomId, System.Collections.Generic.Comparer<int>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<int>.Default);
+            var table = new RoomServerInfoTable(newData);
+            memory = new MemoryDatabase(
+                table,
+                memory.UserDataTable
+            
+            );
+        }
+
+        public void Diff(RoomServerInfo[] addOrReplaceData)
+        {
+            var data = DiffCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), addOrReplaceData, x => x.RoomId, System.Collections.Generic.Comparer<int>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<int>.Default);
+            var table = new RoomServerInfoTable(newData);
+            memory = new MemoryDatabase(
+                table,
+                memory.UserDataTable
+            
+            );
+        }
+
         public void ReplaceAll(System.Collections.Generic.IList<UserData> data)
         {
             var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
             var table = new UserDataTable(newData);
             memory = new MemoryDatabase(
+                memory.RoomServerInfoTable,
                 table
             
             );
@@ -41,6 +77,7 @@ namespace VIRCE_server
             var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
             var table = new UserDataTable(newData);
             memory = new MemoryDatabase(
+                memory.RoomServerInfoTable,
                 table
             
             );
@@ -52,6 +89,7 @@ namespace VIRCE_server
             var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
             var table = new UserDataTable(newData);
             memory = new MemoryDatabase(
+                memory.RoomServerInfoTable,
                 table
             
             );

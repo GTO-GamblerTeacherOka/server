@@ -1,4 +1,6 @@
 ﻿using MasterMemory;
+using VIRCE_server.MasterMemoryDataBase;
+using VIRCE_server.MasterMemoryDataBase.Tables;
 
 namespace VIRCE_server.DataBase;
 

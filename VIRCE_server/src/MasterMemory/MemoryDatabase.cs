@@ -7,18 +7,21 @@ using System.Collections.Generic;
 using System.Net;
 using System;
 using VIRCE_server.DataBase;
-using VIRCE_server.Tables;
+using VIRCE_server.MasterMemoryDataBase.Tables;
 
-namespace VIRCE_server
+namespace VIRCE_server.MasterMemoryDataBase
 {
    public sealed class MemoryDatabase : MemoryDatabaseBase
    {
+        public RoomServerInfoTable RoomServerInfoTable { get; private set; }
         public UserDataTable UserDataTable { get; private set; }
 
         public MemoryDatabase(
+            RoomServerInfoTable RoomServerInfoTable,
             UserDataTable UserDataTable
         )
         {
+            this.RoomServerInfoTable = RoomServerInfoTable;
             this.UserDataTable = UserDataTable;
         }
 
@@ -41,6 +44,7 @@ namespace VIRCE_server
 
         void InitSequential(Dictionary<string, (int offset, int count)> header, System.ReadOnlyMemory<byte> databaseBinary, MessagePack.MessagePackSerializerOptions options, int maxDegreeOfParallelism)
         {
+            this.RoomServerInfoTable = ExtractTableData<RoomServerInfo, RoomServerInfoTable>(header, databaseBinary, options, xs => new RoomServerInfoTable(xs));
             this.UserDataTable = ExtractTableData<UserData, UserDataTable>(header, databaseBinary, options, xs => new UserDataTable(xs));
         }
 
@@ -48,6 +52,7 @@ namespace VIRCE_server
         {
             var extracts = new Action[]
             {
+                () => this.RoomServerInfoTable = ExtractTableData<RoomServerInfo, RoomServerInfoTable>(header, databaseBinary, options, xs => new RoomServerInfoTable(xs)),
                 () => this.UserDataTable = ExtractTableData<UserData, UserDataTable>(header, databaseBinary, options, xs => new UserDataTable(xs)),
             };
             
@@ -65,6 +70,7 @@ namespace VIRCE_server
         public DatabaseBuilder ToDatabaseBuilder()
         {
             var builder = new DatabaseBuilder();
+            builder.Append(this.RoomServerInfoTable.GetRawDataUnsafe());
             builder.Append(this.UserDataTable.GetRawDataUnsafe());
             return builder;
         }
@@ -72,6 +78,7 @@ namespace VIRCE_server
         public DatabaseBuilder ToDatabaseBuilder(MessagePack.IFormatterResolver resolver)
         {
             var builder = new DatabaseBuilder(resolver);
+            builder.Append(this.RoomServerInfoTable.GetRawDataUnsafe());
             builder.Append(this.UserDataTable.GetRawDataUnsafe());
             return builder;
         }
@@ -83,9 +90,12 @@ namespace VIRCE_server
             var result = new ValidateResult();
             var database = new ValidationDatabase(new object[]
             {
+                RoomServerInfoTable,
                 UserDataTable,
             });
 
+            ((ITableUniqueValidate)RoomServerInfoTable).ValidateUnique(result);
+            ValidateTable(RoomServerInfoTable.All, database, "RoomId", RoomServerInfoTable.PrimaryKeySelector, result);
             ((ITableUniqueValidate)UserDataTable).ValidateUnique(result);
             ValidateTable(UserDataTable.All, database, "GlobalUserId", UserDataTable.PrimaryKeySelector, result);
 
@@ -100,6 +110,8 @@ namespace VIRCE_server
         {
             switch (tableName)
             {
+                case "RoomServerInfo":
+                    return db.RoomServerInfoTable;
                 case "UserData":
                     return db.UserDataTable;
                 
@@ -115,7 +127,8 @@ namespace VIRCE_server
             if (metaTable != null) return metaTable;
 
             var dict = new Dictionary<string, MasterMemory.Meta.MetaTable>();
-            dict.Add("UserData", VIRCE_server.Tables.UserDataTable.CreateMetaTable());
+            dict.Add("RoomServerInfo", VIRCE_server.MasterMemoryDataBase.Tables.RoomServerInfoTable.CreateMetaTable());
+            dict.Add("UserData", VIRCE_server.MasterMemoryDataBase.Tables.UserDataTable.CreateMetaTable());
 
             metaTable = new MasterMemory.Meta.MetaDatabase(dict);
             return metaTable;
