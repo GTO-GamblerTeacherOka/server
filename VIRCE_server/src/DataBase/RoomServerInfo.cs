@@ -16,8 +16,6 @@ public class RoomServerInfo
     
     [SecondaryKey(0)]
     public int Port { get; set; }
-    
-    public ushort[] UserIds { get; set; } = null!;
 
     public ServerType Type { get; set; }
 }

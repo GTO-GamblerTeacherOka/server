@@ -16,7 +16,7 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
         readonly Func<UserData, int> primaryIndexSelector;
 
         readonly UserData[] secondaryIndex0;
-        readonly Func<UserData, int> secondaryIndex0Selector;
+        readonly Func<UserData, ushort> secondaryIndex0Selector;
         readonly UserData[] secondaryIndex1;
         readonly Func<UserData, int> secondaryIndex1Selector;
 
@@ -25,7 +25,7 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
         {
             this.primaryIndexSelector = x => x.GlobalUserId;
             this.secondaryIndex0Selector = x => x.UserId;
-            this.secondaryIndex0 = CloneAndSortBy(this.secondaryIndex0Selector, System.Collections.Generic.Comparer<int>.Default);
+            this.secondaryIndex0 = CloneAndSortBy(this.secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default);
             this.secondaryIndex1Selector = x => x.RoomId;
             this.secondaryIndex1 = CloneAndSortBy(this.secondaryIndex1Selector, System.Collections.Generic.Comparer<int>.Default);
             OnAfterConstruct();
@@ -81,19 +81,19 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
             return FindUniqueRangeCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<int>.Default, min, max, ascendant);
         }
 
-        public RangeView<UserData> FindByUserId(int key)
+        public RangeView<UserData> FindByUserId(ushort key)
         {
-            return FindManyCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<int>.Default, key);
+            return FindManyCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default, key);
         }
 
-        public RangeView<UserData> FindClosestByUserId(int key, bool selectLower = true)
+        public RangeView<UserData> FindClosestByUserId(ushort key, bool selectLower = true)
         {
-            return FindManyClosestCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<int>.Default, key, selectLower);
+            return FindManyClosestCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default, key, selectLower);
         }
 
-        public RangeView<UserData> FindRangeByUserId(int min, int max, bool ascendant = true)
+        public RangeView<UserData> FindRangeByUserId(ushort min, ushort max, bool ascendant = true)
         {
-            return FindManyRangeCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<int>.Default, min, max, ascendant);
+            return FindManyRangeCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default, min, max, ascendant);
         }
 
         public RangeView<UserData> FindByRoomId(int key)
@@ -141,7 +141,7 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
                     }, true, true, System.Collections.Generic.Comparer<int>.Default),
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
                         typeof(UserData).GetProperty("UserId"),
-                    }, false, false, System.Collections.Generic.Comparer<int>.Default),
+                    }, false, false, System.Collections.Generic.Comparer<ushort>.Default),
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
                         typeof(UserData).GetProperty("RoomId"),
                     }, false, false, System.Collections.Generic.Comparer<int>.Default),
