@@ -1,16 +1,15 @@
 ﻿using MasterMemory;
 using VIRCE_server.MasterMemoryDataBase;
-using VIRCE_server.MasterMemoryDataBase.Tables;
 
 namespace VIRCE_server.DataBase;
 
 public static class DataBaseManager
 {
     private static DatabaseBuilder _builder = new();
-    private static MemoryDatabase? _db;
+    private static MemoryDatabase _db;
     private const string DbSavePath = "~/VIRECE_server_db.bytes";
     
-    public static void Initialize()
+    static DataBaseManager()
     {
         _db = new MemoryDatabase(_builder.Build());
     }
@@ -25,11 +24,11 @@ public static class DataBaseManager
     public static void RemoveUserData(ushort userId, ushort roomId)
     {
         var globalUserId = userId | roomId << 5;
-        var builder = _db?.ToImmutableBuilder();
-        builder?.RemoveUserData(new []{
+        var builder = _db.ToImmutableBuilder();
+        builder.RemoveUserData(new []{
             globalUserId
         });
-        _db = builder?.Build();
+        _db = builder.Build();
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
         Save();
     }
@@ -40,19 +39,19 @@ public static class DataBaseManager
         await File.WriteAllBytesAsync(DbSavePath, bytes);
     }
     
-    public static UserData? GetUserData(ushort userId, ushort roomId)
+    public static UserData GetUserData(ushort userId, ushort roomId)
     {
         var globalUserId = userId | roomId << 5;
-        return _db?.UserDataTable.FindByGlobalUserId(globalUserId);
+        return _db.UserDataTable.FindByGlobalUserId(globalUserId);
     }
 
-    public static RangeView<UserData>? GetUsers(ushort roomId)
+    public static RangeView<UserData> GetUsers(ushort roomId)
     {
-        return _db?.UserDataTable.FindByRoomId(roomId);
+        return _db.UserDataTable.FindByRoomId(roomId);
     }
     
-    public static int[]? GetRoomIds()
+    public static int[] GetRoomIds()
     {
-        return _db?.UserDataTable.SortByRoomId.Select(x => x.RoomId).Distinct().ToArray();
+        return _db.UserDataTable.SortByRoomId.Select(x => x.RoomId).Distinct().ToArray();
     }
 }
