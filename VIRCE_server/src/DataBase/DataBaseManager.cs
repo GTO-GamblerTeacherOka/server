@@ -21,12 +21,30 @@ public static class DataBaseManager
         Save();
     }
     
-    public static void RemoveUserData(ushort userId, ushort roomId)
+    public static void RemoveUserData(in ushort userId, in ushort roomId)
     {
         var globalUserId = userId | roomId << 5;
         var builder = _db.ToImmutableBuilder();
         builder.RemoveUserData(new []{
             globalUserId
+        });
+        _db = builder.Build();
+        _builder = _db?.ToDatabaseBuilder() ?? _builder;
+        Save();
+    }
+    
+    public static void AddRoomServerInfo(RoomServerInfo roomServerInfo)
+    {
+        _builder.Append(new List<RoomServerInfo> {roomServerInfo});
+        _db = new MemoryDatabase(_builder.Build());
+        Save();
+    }
+    
+    public static void RemoveRoomServerInfo(in int roomId)
+    {
+        var builder = _db.ToImmutableBuilder();
+        builder.RemoveRoomServerInfo(new []{
+            roomId
         });
         _db = builder.Build();
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
@@ -39,19 +57,29 @@ public static class DataBaseManager
         await File.WriteAllBytesAsync(DbSavePath, bytes);
     }
     
-    public static UserData GetUserData(ushort userId, ushort roomId)
+    public static UserData GetUserData(in ushort userId, in int roomId)
     {
         var globalUserId = userId | roomId << 5;
         return _db.UserDataTable.FindByGlobalUserId(globalUserId);
     }
 
-    public static RangeView<UserData> GetUsers(ushort roomId)
+    public static RangeView<UserData> GetUsers(int? roomId = null)
     {
-        return _db.UserDataTable.FindByRoomId(roomId);
+        return roomId is null ? _db.UserDataTable.All : _db.UserDataTable.FindByRoomId(roomId.Value);
     }
     
-    public static int[] GetRoomIds()
+    public static RangeView<RoomServerInfo> GetRooms()
     {
-        return _db.UserDataTable.SortByRoomId.Select(x => x.RoomId).Distinct().ToArray();
+        return _db.RoomServerInfoTable.All;
+    }
+    
+    public static RoomServerInfo GetRoomFromRoomId(in ushort roomId)
+    {
+        return _db.RoomServerInfoTable.FindByRoomId(roomId);
+    }
+    
+    public static RoomServerInfo GetRoomFromPort(in int port)
+    {
+        return _db.RoomServerInfoTable.FindByPort(port);
     }
 }
