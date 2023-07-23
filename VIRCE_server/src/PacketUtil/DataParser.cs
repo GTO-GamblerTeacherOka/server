@@ -29,4 +29,9 @@ public static class DataParser
         var rid = (ushort)(header[1] & 0b1111_1110 >> 1);
         return (flag, uid, rid);
     }
+    
+    public static int GetGlobalUserId(in ushort userId, in ushort roomId)
+    {
+        return userId | roomId << 5;
+    }
 }
