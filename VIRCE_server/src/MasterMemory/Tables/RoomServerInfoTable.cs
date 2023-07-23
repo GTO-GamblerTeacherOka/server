@@ -116,6 +116,7 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
                     new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("RoomId")),
                     new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("Port")),
                     new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("UserIds")),
+                    new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("Type")),
                 },
                 new MasterMemory.Meta.MetaIndex[]{
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
