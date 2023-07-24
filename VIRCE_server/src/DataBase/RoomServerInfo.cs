@@ -12,7 +12,7 @@ public class RoomServerInfo
     }
     
     [PrimaryKey] 
-    public int RoomId { get; set; }
+    public ushort RoomId { get; set; }
     
     [SecondaryKey(0)]
     public int Port { get; set; }

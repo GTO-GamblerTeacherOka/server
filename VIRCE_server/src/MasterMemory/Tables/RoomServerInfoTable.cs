@@ -11,8 +11,8 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
 {
    public sealed partial class RoomServerInfoTable : TableBase<RoomServerInfo>, ITableUniqueValidate
    {
-        public Func<RoomServerInfo, int> PrimaryKeySelector => primaryIndexSelector;
-        readonly Func<RoomServerInfo, int> primaryIndexSelector;
+        public Func<RoomServerInfo, ushort> PrimaryKeySelector => primaryIndexSelector;
+        readonly Func<RoomServerInfo, ushort> primaryIndexSelector;
 
         readonly RoomServerInfo[] secondaryIndex0;
         readonly Func<RoomServerInfo, int> secondaryIndex0Selector;
@@ -30,49 +30,24 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
 
         public RangeView<RoomServerInfo> SortByPort => new RangeView<RoomServerInfo>(secondaryIndex0, 0, secondaryIndex0.Length - 1, true);
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public RoomServerInfo FindByRoomId(int key)
+        public RoomServerInfo FindByRoomId(ushort key)
         {
-            var lo = 0;
-            var hi = data.Length - 1;
-            while (lo <= hi)
-            {
-                var mid = (int)(((uint)hi + (uint)lo) >> 1);
-                var selected = data[mid].RoomId;
-                var found = (selected < key) ? -1 : (selected > key) ? 1 : 0;
-                if (found == 0) { return data[mid]; }
-                if (found < 0) { lo = mid + 1; }
-                else { hi = mid - 1; }
-            }
-            return default;
+            return FindUniqueCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, key, false);
+        }
+        
+        public bool TryFindByRoomId(ushort key, out RoomServerInfo result)
+        {
+            return TryFindUniqueCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, key, out result);
         }
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool TryFindByRoomId(int key, out RoomServerInfo result)
+        public RoomServerInfo FindClosestByRoomId(ushort key, bool selectLower = true)
         {
-            var lo = 0;
-            var hi = data.Length - 1;
-            while (lo <= hi)
-            {
-                var mid = (int)(((uint)hi + (uint)lo) >> 1);
-                var selected = data[mid].RoomId;
-                var found = (selected < key) ? -1 : (selected > key) ? 1 : 0;
-                if (found == 0) { result = data[mid]; return true; }
-                if (found < 0) { lo = mid + 1; }
-                else { hi = mid - 1; }
-            }
-            result = default;
-            return false;
+            return FindUniqueClosestCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, key, selectLower);
         }
 
-        public RoomServerInfo FindClosestByRoomId(int key, bool selectLower = true)
+        public RangeView<RoomServerInfo> FindRangeByRoomId(ushort min, ushort max, bool ascendant = true)
         {
-            return FindUniqueClosestCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<int>.Default, key, selectLower);
-        }
-
-        public RangeView<RoomServerInfo> FindRangeByRoomId(int min, int max, bool ascendant = true)
-        {
-            return FindUniqueRangeCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<int>.Default, min, max, ascendant);
+            return FindUniqueRangeCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, min, max, ascendant);
         }
 
         public RoomServerInfo FindByPort(int key)
@@ -120,7 +95,7 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
                 new MasterMemory.Meta.MetaIndex[]{
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
                         typeof(RoomServerInfo).GetProperty("RoomId"),
-                    }, true, true, System.Collections.Generic.Comparer<int>.Default),
+                    }, true, true, System.Collections.Generic.Comparer<ushort>.Default),
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
                         typeof(RoomServerInfo).GetProperty("Port"),
                     }, false, true, System.Collections.Generic.Comparer<int>.Default),

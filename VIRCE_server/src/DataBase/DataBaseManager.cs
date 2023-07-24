@@ -54,7 +54,7 @@ public static class DataBaseManager
         Save();
     }
     
-    public static void RemoveRoomServerInfo(in int roomId)
+    public static void RemoveRoomServerInfo(in ushort roomId)
     {
         var builder = _db.ToImmutableBuilder();
         builder.RemoveRoomServerInfo(new []{
@@ -76,13 +76,13 @@ public static class DataBaseManager
         await File.WriteAllBytesAsync(DbSavePath, bytes);
     }
     
-    public static UserData GetUserData(in ushort userId, in int roomId)
+    public static UserData GetUserData(in ushort userId, in ushort roomId)
     {
         var globalUserId = userId | roomId << 5;
         return _db.UserDataTable.FindByGlobalUserId(globalUserId);
     }
 
-    public static RangeView<UserData> GetUsers(int? roomId = null)
+    public static RangeView<UserData> GetUsers(ushort? roomId = null)
     {
         return roomId is null ? _db.UserDataTable.All : _db.UserDataTable.FindByRoomId(roomId.Value);
     }
@@ -102,7 +102,7 @@ public static class DataBaseManager
         return _db.RoomServerInfoTable.FindByPort(port);
     }
     
-    public static int[] GetRoomIds()
+    public static ushort[] GetRoomIds()
     {
         var roomIds = _db.RoomServerInfoTable.All.Select(info => info.RoomId);
 
