@@ -30,10 +30,33 @@ public class MiniGameRoom : Server
         UdpClient = null;
         DataBaseManager.RemoveRoomServerInfo(ServerInfo);
     }
-    
-    public override void OnReceive(IPEndPoint remoteEndPoint, byte[] data)
+
+    protected override void OnReceive(IPEndPoint remoteEndPoint, byte[] data)
     {
         var parsedData = DataParser.Split(data);
         var header = DataParser.AnalyzeHeader(parsedData.header);
+        switch (header.flag)
+        {
+            case DataParser.Flag.PositionData:
+            case DataParser.Flag.AvatarData:
+                Broadcast(header.roomID, data);
+                break;
+            case DataParser.Flag.RoomEntry:
+                break;
+            case DataParser.Flag.RoomExit:
+                break;
+            case DataParser.Flag.SendReaction:
+                break;
+            case DataParser.Flag.ReceiveReaction:
+                break;
+            case DataParser.Flag.ChatData:
+                break;
+            case DataParser.Flag.GetRemoteEndPoint:
+                break;
+            case DataParser.Flag.ReceiveRemoteEndPoint:
+                break;
+            default:
+                throw new Exception("the flag is not defined.");
+        }
     }
 }
