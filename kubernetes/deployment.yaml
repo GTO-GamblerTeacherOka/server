@@ -1,0 +1,22 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: virce-server
+  labels:
+    app: virce-server
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: virce-server
+  template:
+    metadata:
+      labels:
+        app: virce-server
+    spec:
+      containers:
+        - name: virce-server
+          image: virce_server:kubernetes
+          ports:
+            - containerPort: 8192
