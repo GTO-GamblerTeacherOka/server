@@ -23,6 +23,18 @@ public abstract class Server
         Port = (UdpClient.Client.LocalEndPoint as IPEndPoint)!.Port;
     }
 
+    protected void Broadcast(ushort roomId, byte[] data)
+    {
+        UniTask.Run(() =>
+        {
+            var roomMembers = DataBaseManager.GetUsers(roomId);
+            foreach (var roomMember in roomMembers)
+            {
+                UdpClient?.SendAsync(data, data.Length, roomMember.RemoteEndPoint);
+            }
+        }, false);
+    }
+
     protected static ushort GetId()
     {
         var ids = DataBaseManager.GetRoomIds();
@@ -43,5 +55,5 @@ public abstract class Server
 
     public abstract void Start();
     public abstract void Stop();
-    public abstract void OnReceive(IPEndPoint remoteEndPoint, byte[] data);
+    protected abstract void OnReceive(IPEndPoint remoteEndPoint, byte[] data);
 }
