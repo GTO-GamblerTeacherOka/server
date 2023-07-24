@@ -14,9 +14,8 @@ public static class DataBaseManager
         _db = new MemoryDatabase(_builder.Build());
     }
 
-    public static int Initialize()
+    public static void Initialize()
     {
-        return 0;
     }
     
     public static void AddUserData(UserData userData)
