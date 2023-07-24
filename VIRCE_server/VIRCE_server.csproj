@@ -11,6 +11,7 @@
     <ItemGroup>
       <PackageReference Include="MasterMemory" Version="2.4.4" />
       <PackageReference Include="MasterMemory.MSBuild.Tasks" Version="2.4.4" PrivateAssets="All" />
+      <PackageReference Include="UniTask" Version="2.3.3" />
     </ItemGroup>
 
     <!-- Call code generator before-build. -->
