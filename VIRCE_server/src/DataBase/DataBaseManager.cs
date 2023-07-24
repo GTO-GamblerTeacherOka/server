@@ -13,6 +13,11 @@ public static class DataBaseManager
     {
         _db = new MemoryDatabase(_builder.Build());
     }
+
+    public static int Initialize()
+    {
+        return 0;
+    }
     
     public static void AddUserData(UserData userData)
     {
@@ -21,7 +26,7 @@ public static class DataBaseManager
         Save();
     }
     
-    public static void RemoveUserData(in ushort userId, in ushort roomId)
+    public static void RemoveUserData(in ushort userId, in int roomId)
     {
         var globalUserId = userId | roomId << 5;
         var builder = _db.ToImmutableBuilder();
@@ -32,9 +37,18 @@ public static class DataBaseManager
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
         Save();
     }
+
+    public static void RemoveUserData(in UserData userData)
+    {
+        RemoveUserData(userData.UserId, userData.RoomId);
+    } 
     
     public static void AddRoomServerInfo(RoomServerInfo roomServerInfo)
     {
+        if (_db.RoomServerInfoTable.FindByRoomId(roomServerInfo.RoomId) is not null)
+        {
+            throw new Exception("RoomServer is already exist");
+        }
         _builder.Append(new List<RoomServerInfo> {roomServerInfo});
         _db = new MemoryDatabase(_builder.Build());
         Save();
@@ -49,6 +63,11 @@ public static class DataBaseManager
         _db = builder.Build();
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
         Save();
+    }
+    
+    public static void RemoveRoomServerInfo(in RoomServerInfo roomServerInfo)
+    {
+        RemoveRoomServerInfo(roomServerInfo.RoomId);
     }
     
     private static async void Save()
@@ -81,5 +100,12 @@ public static class DataBaseManager
     public static RoomServerInfo GetRoomFromPort(in int port)
     {
         return _db.RoomServerInfoTable.FindByPort(port);
+    }
+    
+    public static int[] GetRoomIds()
+    {
+        var roomIds = _db.RoomServerInfoTable.All.Select(info => info.RoomId);
+
+        return roomIds.ToArray();
     }
 }
