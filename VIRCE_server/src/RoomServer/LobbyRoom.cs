@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Cysharp.Threading.Tasks;
 using VIRCE_server.DataBase;
 using VIRCE_server.PacketUtil;
 
@@ -12,7 +13,7 @@ public class LobbyRoom : Server
         {
             Bind();
         }
-        RoomId = GetId();
+        RoomId = GetRoomId();
         ServerInfo = new RoomServerInfo
         {
             RoomId = RoomId,
@@ -20,6 +21,7 @@ public class LobbyRoom : Server
             Type = RoomServerInfo.ServerType.Lobby
         };
         DataBaseManager.AddRoomServerInfo(ServerInfo);
+        ReceiveStart().Forget();
         IsRunning = true;
     }
     
@@ -31,7 +33,7 @@ public class LobbyRoom : Server
         DataBaseManager.RemoveRoomServerInfo(ServerInfo);
     }
 
-    protected override void OnReceive(IPEndPoint remoteEndPoint, byte[] data)
+    protected override void OnReceive(in IPEndPoint remoteEndPoint, in byte[] data)
     {
         var parsedData = DataParser.Split(data);
         var header = DataParser.AnalyzeHeader(parsedData.header);
@@ -42,6 +44,7 @@ public class LobbyRoom : Server
                 Broadcast(header.roomID, data);
                 break;
             case DataParser.Flag.RoomEntry:
+                Entry(remoteEndPoint);
                 break;
             case DataParser.Flag.RoomExit:
                 break;
