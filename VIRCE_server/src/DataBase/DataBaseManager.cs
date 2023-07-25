@@ -18,7 +18,7 @@ public static class DataBaseManager
     {
     }
     
-    public static void AddUserData(UserData userData)
+    public static void AddUserData(in UserData userData)
     {
         _builder.Append(new List<UserData> {userData});
         _db = new MemoryDatabase(_builder.Build());
@@ -42,7 +42,7 @@ public static class DataBaseManager
         RemoveUserData(userData.UserId, userData.RoomId);
     } 
     
-    public static void AddRoomServerInfo(RoomServerInfo roomServerInfo)
+    public static void AddRoomServerInfo(in RoomServerInfo roomServerInfo)
     {
         if (_db.RoomServerInfoTable.FindByRoomId(roomServerInfo.RoomId) is not null)
         {
@@ -81,7 +81,7 @@ public static class DataBaseManager
         return _db.UserDataTable.FindByGlobalUserId(globalUserId);
     }
 
-    public static RangeView<UserData> GetUsers(ushort? roomId = null)
+    public static RangeView<UserData> GetUsers(in ushort? roomId = null)
     {
         return roomId is null ? _db.UserDataTable.All : _db.UserDataTable.FindByRoomId(roomId.Value);
     }
