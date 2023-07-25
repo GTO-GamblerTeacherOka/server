@@ -4,8 +4,9 @@ namespace VIRCE_server;
 
 internal static class VirceServer
 {
-    private static void Main()
+    private static async Task Main()
     {
+        var client = new HttpClient();
         Console.WriteLine("Starting...");
         DataBaseManager.Initialize();
     }
