@@ -9,7 +9,7 @@ public abstract class Server
 {
     public int Port { get; private set; }
     protected UdpClient? UdpClient;
-    public bool IsRunning { get; protected set; } = false;
+    public bool IsRunning { get; protected set; }
     public ushort RoomId { get; protected set; }
     protected RoomServerInfo ServerInfo = null!;
 
@@ -35,9 +35,34 @@ public abstract class Server
         }, false);
     }
 
-    protected static ushort GetId()
+    protected void Entry(in IPEndPoint endPoint)
+    {
+        var userId = GetUserId();
+        var user = new UserData
+        {
+            UserId = userId,
+            RoomId = RoomId,
+            RemoteEndPoint = endPoint
+        };
+        DataBaseManager.AddUserData(user);
+        var msg = BitConverter.GetBytes(userId);
+        UdpClient?.SendAsync(msg, msg.Length, endPoint);
+    }
+
+    protected static ushort GetRoomId()
     {
         var ids = DataBaseManager.GetRoomIds();
+        ushort id = 1;
+        while (true)
+        {
+            if (!ids.Contains(id)) return id;
+            id++;
+        }
+    }
+
+    private ushort GetUserId()
+    {
+        var ids = DataBaseManager.GetUsers(RoomId).Select(data => data.UserId).ToArray();
         ushort id = 0;
         while (true)
         {
@@ -49,11 +74,14 @@ public abstract class Server
     protected async UniTask ReceiveStart()
     {
         if (UdpClient is null) return;
-        var res = await UdpClient.ReceiveAsync();
-        UniTask.Run(() => OnReceive(res.RemoteEndPoint, res.Buffer), false);
+        while(true)
+        {
+            var res = await UdpClient.ReceiveAsync();
+            UniTask.Run(() => OnReceive(res.RemoteEndPoint, res.Buffer), false);
+        }
     }
 
     public abstract void Start();
     public abstract void Stop();
-    protected abstract void OnReceive(IPEndPoint remoteEndPoint, byte[] data);
+    protected abstract void OnReceive(in IPEndPoint remoteEndPoint, in byte[] data);
 }
