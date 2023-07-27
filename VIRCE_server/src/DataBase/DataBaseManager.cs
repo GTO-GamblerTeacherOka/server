@@ -7,7 +7,7 @@ public static class DataBaseManager
 {
     private static DatabaseBuilder _builder = new();
     private static MemoryDatabase _db;
-    private const string DbSavePath = "~/VIRECE_server_db.bytes";
+    private const string DbSavePath = "./VIRECE_server_db.bytes";
     
     static DataBaseManager()
     {
@@ -20,8 +20,9 @@ public static class DataBaseManager
     
     public static void AddUserData(in UserData userData)
     {
-        _builder.Append(new List<UserData> {userData});
-        _db = new MemoryDatabase(_builder.Build());
+        var builder = _db.ToImmutableBuilder();
+        builder.Diff(new [] {userData});
+        _db = builder.Build();
         Save();
     }
     
@@ -48,8 +49,10 @@ public static class DataBaseManager
         {
             throw new Exception("RoomServer is already exist");
         }
-        _builder.Append(new List<RoomServerInfo> {roomServerInfo});
-        _db = new MemoryDatabase(_builder.Build());
+
+        var builder = _db.ToImmutableBuilder();
+        builder.Diff(new [] {roomServerInfo});
+        _db = builder.Build();
         Save();
     }
     
