@@ -11,5 +11,6 @@ internal static class VirceServer
         Console.WriteLine("Starting...");
         DataBaseManager.Initialize();
         MatchingServer.Instance.Start();
+        while(MatchingServer.Instance.IsRunning){}
     }
 }
