@@ -13,8 +13,29 @@ public abstract class Server
     public ushort RoomId { get; protected set; }
     protected RoomServerInfo ServerInfo = null!;
 
+    public int Occupants { get; private set; }
+    private bool _available = true;
+
     protected Server()
     {
+        Occupants = 0;
+        UniTask.Run(async () =>
+        {
+            while(_available)
+            {
+                if (IsRunning)
+                {
+                    Occupants = DataBaseManager.GetUsers(RoomId).Count;
+                }
+                await Task.Delay(1000);
+            }
+        });
+    }
+    
+    ~Server()
+    {
+        _available = false;
+        Task.Delay(2000).Wait();
     }
 
     protected void Bind()
@@ -35,7 +56,7 @@ public abstract class Server
         }, false);
     }
 
-    protected void Entry(in IPEndPoint endPoint)
+    public void Entry(in IPEndPoint endPoint)
     {
         var userId = GetUserId();
         var user = new UserData
