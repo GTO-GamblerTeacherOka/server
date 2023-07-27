@@ -14,10 +14,10 @@ public class UserData
     
     [SecondaryKey(1), NonUnique]
     public int RoomId { get; set; }
+
+    public string ModelId { get; set; } = string.Empty;
     
-    public string ModelId { get; set; }
+    public string Name { get; set; } = string.Empty;
     
-    public string Name { get; set; }
-    
-    public IPEndPoint RemoteEndPoint { get; set; }
+    public IPEndPoint RemoteEndPoint { get; set; } = null!;
 }
