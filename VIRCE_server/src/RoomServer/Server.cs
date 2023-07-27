@@ -40,7 +40,7 @@ public abstract class Server
 
     protected void Bind()
     {
-        UdpClient ??= new UdpClient();
+        UdpClient ??= new UdpClient(0);
         Port = (UdpClient.Client.LocalEndPoint as IPEndPoint)!.Port;
     }
 
