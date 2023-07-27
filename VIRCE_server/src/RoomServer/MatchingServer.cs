@@ -31,7 +31,7 @@ public class MatchingServer
         IsRunning = false;
     }
 
-    private void Start()
+    public void Start()
     {
         _lobbyServerCluster.Start();
         _miniGameServerCluster.Start();
@@ -39,7 +39,7 @@ public class MatchingServer
         ReceiveStart().Forget();
     }
 
-    private void Stop()
+    public void Stop()
     {
         IsRunning = false;
     }
