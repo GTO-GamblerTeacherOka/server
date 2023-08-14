@@ -53,6 +53,7 @@ public class MiniGameRoom : Server
             case DataParser.Flag.ReceiveReaction:
                 break;
             case DataParser.Flag.ChatData:
+                Broadcast(header.roomID, data);
                 break;
             case DataParser.Flag.GetRemoteEndPoint:
                 break;
