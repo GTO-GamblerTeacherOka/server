@@ -67,6 +67,7 @@ public abstract class Server
         };
         DataBaseManager.AddUserData(user);
         var msg = BitConverter.GetBytes(user.GlobalUserId);
+        Console.WriteLine($"Entry: {user.GlobalUserId}");
         UdpClient?.SendAsync(msg, msg.Length, endPoint);
     }
 
@@ -84,7 +85,7 @@ public abstract class Server
     private byte GetUserId()
     {
         var ids = DataBaseManager.GetUsers(RoomId).Select(data => data.UserId).ToArray();
-        byte id = 0;
+        byte id = 1;
         while (true)
         {
             if (!ids.Contains(id)) return id;

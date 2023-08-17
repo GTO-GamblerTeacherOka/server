@@ -53,7 +53,7 @@ public class MatchingServer
             var (rawHeader,rawBody) = DataParser.Split(data.Buffer);
             var header = DataParser.AnalyzeHeader(rawHeader);
             if (header.flag != DataParser.Flag.RoomEntry) continue;
-            var roomType = BitConverter.ToInt32(rawBody);
+            var roomType = rawBody[0];
             switch (roomType)
             {
                 case 0:
