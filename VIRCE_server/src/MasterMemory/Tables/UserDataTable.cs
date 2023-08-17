@@ -12,22 +12,22 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
 {
    public sealed partial class UserDataTable : TableBase<UserData>, ITableUniqueValidate
    {
-        public Func<UserData, int> PrimaryKeySelector => primaryIndexSelector;
-        readonly Func<UserData, int> primaryIndexSelector;
+        public Func<UserData, ushort> PrimaryKeySelector => primaryIndexSelector;
+        readonly Func<UserData, ushort> primaryIndexSelector;
 
         readonly UserData[] secondaryIndex0;
-        readonly Func<UserData, ushort> secondaryIndex0Selector;
+        readonly Func<UserData, byte> secondaryIndex0Selector;
         readonly UserData[] secondaryIndex1;
-        readonly Func<UserData, int> secondaryIndex1Selector;
+        readonly Func<UserData, byte> secondaryIndex1Selector;
 
         public UserDataTable(UserData[] sortedData)
             : base(sortedData)
         {
             this.primaryIndexSelector = x => x.GlobalUserId;
             this.secondaryIndex0Selector = x => x.UserId;
-            this.secondaryIndex0 = CloneAndSortBy(this.secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default);
+            this.secondaryIndex0 = CloneAndSortBy(this.secondaryIndex0Selector, System.Collections.Generic.Comparer<byte>.Default);
             this.secondaryIndex1Selector = x => x.RoomId;
-            this.secondaryIndex1 = CloneAndSortBy(this.secondaryIndex1Selector, System.Collections.Generic.Comparer<int>.Default);
+            this.secondaryIndex1 = CloneAndSortBy(this.secondaryIndex1Selector, System.Collections.Generic.Comparer<byte>.Default);
             OnAfterConstruct();
         }
 
@@ -36,79 +36,54 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
         public RangeView<UserData> SortByUserId => new RangeView<UserData>(secondaryIndex0, 0, secondaryIndex0.Length - 1, true);
         public RangeView<UserData> SortByRoomId => new RangeView<UserData>(secondaryIndex1, 0, secondaryIndex1.Length - 1, true);
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public UserData FindByGlobalUserId(int key)
+        public UserData FindByGlobalUserId(ushort key)
         {
-            var lo = 0;
-            var hi = data.Length - 1;
-            while (lo <= hi)
-            {
-                var mid = (int)(((uint)hi + (uint)lo) >> 1);
-                var selected = data[mid].GlobalUserId;
-                var found = (selected < key) ? -1 : (selected > key) ? 1 : 0;
-                if (found == 0) { return data[mid]; }
-                if (found < 0) { lo = mid + 1; }
-                else { hi = mid - 1; }
-            }
-            return default;
+            return FindUniqueCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, key, false);
+        }
+        
+        public bool TryFindByGlobalUserId(ushort key, out UserData result)
+        {
+            return TryFindUniqueCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, key, out result);
         }
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool TryFindByGlobalUserId(int key, out UserData result)
+        public UserData FindClosestByGlobalUserId(ushort key, bool selectLower = true)
         {
-            var lo = 0;
-            var hi = data.Length - 1;
-            while (lo <= hi)
-            {
-                var mid = (int)(((uint)hi + (uint)lo) >> 1);
-                var selected = data[mid].GlobalUserId;
-                var found = (selected < key) ? -1 : (selected > key) ? 1 : 0;
-                if (found == 0) { result = data[mid]; return true; }
-                if (found < 0) { lo = mid + 1; }
-                else { hi = mid - 1; }
-            }
-            result = default;
-            return false;
+            return FindUniqueClosestCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, key, selectLower);
         }
 
-        public UserData FindClosestByGlobalUserId(int key, bool selectLower = true)
+        public RangeView<UserData> FindRangeByGlobalUserId(ushort min, ushort max, bool ascendant = true)
         {
-            return FindUniqueClosestCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<int>.Default, key, selectLower);
+            return FindUniqueRangeCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<ushort>.Default, min, max, ascendant);
         }
 
-        public RangeView<UserData> FindRangeByGlobalUserId(int min, int max, bool ascendant = true)
+        public RangeView<UserData> FindByUserId(byte key)
         {
-            return FindUniqueRangeCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<int>.Default, min, max, ascendant);
+            return FindManyCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<byte>.Default, key);
         }
 
-        public RangeView<UserData> FindByUserId(ushort key)
+        public RangeView<UserData> FindClosestByUserId(byte key, bool selectLower = true)
         {
-            return FindManyCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default, key);
+            return FindManyClosestCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<byte>.Default, key, selectLower);
         }
 
-        public RangeView<UserData> FindClosestByUserId(ushort key, bool selectLower = true)
+        public RangeView<UserData> FindRangeByUserId(byte min, byte max, bool ascendant = true)
         {
-            return FindManyClosestCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default, key, selectLower);
+            return FindManyRangeCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<byte>.Default, min, max, ascendant);
         }
 
-        public RangeView<UserData> FindRangeByUserId(ushort min, ushort max, bool ascendant = true)
+        public RangeView<UserData> FindByRoomId(byte key)
         {
-            return FindManyRangeCore(secondaryIndex0, secondaryIndex0Selector, System.Collections.Generic.Comparer<ushort>.Default, min, max, ascendant);
+            return FindManyCore(secondaryIndex1, secondaryIndex1Selector, System.Collections.Generic.Comparer<byte>.Default, key);
         }
 
-        public RangeView<UserData> FindByRoomId(int key)
+        public RangeView<UserData> FindClosestByRoomId(byte key, bool selectLower = true)
         {
-            return FindManyCore(secondaryIndex1, secondaryIndex1Selector, System.Collections.Generic.Comparer<int>.Default, key);
+            return FindManyClosestCore(secondaryIndex1, secondaryIndex1Selector, System.Collections.Generic.Comparer<byte>.Default, key, selectLower);
         }
 
-        public RangeView<UserData> FindClosestByRoomId(int key, bool selectLower = true)
+        public RangeView<UserData> FindRangeByRoomId(byte min, byte max, bool ascendant = true)
         {
-            return FindManyClosestCore(secondaryIndex1, secondaryIndex1Selector, System.Collections.Generic.Comparer<int>.Default, key, selectLower);
-        }
-
-        public RangeView<UserData> FindRangeByRoomId(int min, int max, bool ascendant = true)
-        {
-            return FindManyRangeCore(secondaryIndex1, secondaryIndex1Selector, System.Collections.Generic.Comparer<int>.Default, min, max, ascendant);
+            return FindManyRangeCore(secondaryIndex1, secondaryIndex1Selector, System.Collections.Generic.Comparer<byte>.Default, min, max, ascendant);
         }
 
 
@@ -138,13 +113,13 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
                 new MasterMemory.Meta.MetaIndex[]{
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
                         typeof(UserData).GetProperty("GlobalUserId"),
-                    }, true, true, System.Collections.Generic.Comparer<int>.Default),
+                    }, true, true, System.Collections.Generic.Comparer<ushort>.Default),
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
                         typeof(UserData).GetProperty("UserId"),
-                    }, false, false, System.Collections.Generic.Comparer<ushort>.Default),
+                    }, false, false, System.Collections.Generic.Comparer<byte>.Default),
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
                         typeof(UserData).GetProperty("RoomId"),
-                    }, false, false, System.Collections.Generic.Comparer<int>.Default),
+                    }, false, false, System.Collections.Generic.Comparer<byte>.Default),
                 });
         }
 

@@ -24,7 +24,7 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public DatabaseBuilder Append(System.Collections.Generic.IEnumerable<UserData> dataSource)
         {
-            AppendCore(dataSource, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
+            AppendCore(dataSource, x => x.GlobalUserId, System.Collections.Generic.Comparer<ushort>.Default);
             return this;
         }
 

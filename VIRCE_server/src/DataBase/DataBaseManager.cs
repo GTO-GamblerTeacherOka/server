@@ -28,7 +28,7 @@ public static class DataBaseManager
     
     public static void RemoveUserData(in ushort userId, in int roomId)
     {
-        var globalUserId = userId | roomId << 5;
+        var globalUserId = (ushort)(userId | roomId << 5);
         var builder = _db.ToImmutableBuilder();
         builder.RemoveUserData(new []{
             globalUserId
@@ -78,13 +78,13 @@ public static class DataBaseManager
         await File.WriteAllBytesAsync(DbSavePath, bytes);
     }
     
-    public static UserData GetUserData(in ushort userId, in ushort roomId)
+    public static UserData GetUserData(in byte userId, in byte roomId)
     {
-        var globalUserId = userId | roomId << 5;
+        var globalUserId = (ushort)(userId | roomId << 5);
         return _db.UserDataTable.FindByGlobalUserId(globalUserId);
     }
 
-    public static RangeView<UserData> GetUsers(in ushort? roomId = null)
+    public static RangeView<UserData> GetUsers(in byte? roomId = null)
     {
         return roomId is null ? _db.UserDataTable.All : _db.UserDataTable.FindByRoomId(roomId.Value);
     }

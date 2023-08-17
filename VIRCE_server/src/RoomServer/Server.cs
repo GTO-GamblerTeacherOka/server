@@ -10,7 +10,7 @@ public abstract class Server
     public int Port { get; private set; }
     protected UdpClient? UdpClient;
     public bool IsRunning { get; protected set; }
-    public ushort RoomId { get; protected set; }
+    public byte RoomId { get; protected set; }
     protected RoomServerInfo ServerInfo = null!;
 
     public int Occupants { get; private set; }
@@ -44,7 +44,7 @@ public abstract class Server
         Port = (UdpClient.Client.LocalEndPoint as IPEndPoint)!.Port;
     }
 
-    protected void Broadcast(ushort roomId, byte[] data)
+    protected void Broadcast(byte roomId, byte[] data)
     {
         UniTask.Run(() =>
         {
@@ -66,14 +66,14 @@ public abstract class Server
             RemoteEndPoint = endPoint
         };
         DataBaseManager.AddUserData(user);
-        var msg = BitConverter.GetBytes(userId);
+        var msg = BitConverter.GetBytes(user.GlobalUserId);
         UdpClient?.SendAsync(msg, msg.Length, endPoint);
     }
 
-    protected static ushort GetRoomId()
+    protected static byte GetRoomId()
     {
         var ids = DataBaseManager.GetRoomIds();
-        ushort id = 1;
+        byte id = 1;
         while (true)
         {
             if (!ids.Contains(id)) return id;
@@ -81,10 +81,10 @@ public abstract class Server
         }
     }
 
-    private ushort GetUserId()
+    private byte GetUserId()
     {
         var ids = DataBaseManager.GetUsers(RoomId).Select(data => data.UserId).ToArray();
-        ushort id = 0;
+        byte id = 0;
         while (true)
         {
             if (!ids.Contains(id)) return id;

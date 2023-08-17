@@ -22,16 +22,16 @@ public static class DataParser
         return (data[..HeaderSize], data[HeaderSize..]);
     }
     
-    public static (Flag flag, ushort userID, ushort roomID) AnalyzeHeader(in byte[] header)
+    public static (Flag flag, byte userID, byte roomID) AnalyzeHeader(in byte[] header)
     {
         var flag = (Flag)(header[0] & 0b0000_1111);
-        var uid = (ushort)((header[0] & 0b1111_0000) >> 4 | (header[1] & 0b0000_0001) << 4);
-        var rid = (ushort)(header[1] & 0b1111_1110 >> 1);
+        var uid = (byte)((header[0] & 0b1111_0000) >> 4 | (header[1] & 0b0000_0001) << 4);
+        var rid = (byte)(header[1] & 0b1111_1110 >> 1);
         return (flag, uid, rid);
     }
     
-    public static int GetGlobalUserId(in ushort userId, in ushort roomId)
+    public static ushort GetGlobalUserId(in byte userId, in byte roomId)
     {
-        return userId | roomId << 5;
+        return (ushort)(userId | roomId << 5);
     }
 }

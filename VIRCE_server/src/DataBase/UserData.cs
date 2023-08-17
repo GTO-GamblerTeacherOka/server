@@ -7,13 +7,13 @@ namespace VIRCE_server.DataBase;
 [MemoryTable("UserData"), MessagePackObject(true)]
 public class UserData
 {
-    [PrimaryKey] public int GlobalUserId => UserId | RoomId << 5;
+    [PrimaryKey] public ushort GlobalUserId => (ushort)(UserId | RoomId << 5);
     
     [SecondaryKey(0), NonUnique]
-    public ushort UserId { get; set; }
+    public byte UserId { get; set; }
     
     [SecondaryKey(1), NonUnique]
-    public int RoomId { get; set; }
+    public byte RoomId { get; set; }
 
     public string ModelId { get; set; } = string.Empty;
     

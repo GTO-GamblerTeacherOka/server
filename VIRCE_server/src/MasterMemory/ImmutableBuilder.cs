@@ -62,7 +62,7 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public void ReplaceAll(System.Collections.Generic.IList<UserData> data)
         {
-            var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
+            var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<ushort>.Default);
             var table = new UserDataTable(newData);
             memory = new MemoryDatabase(
                 memory.RoomServerInfoTable,
@@ -71,10 +71,10 @@ namespace VIRCE_server.MasterMemoryDataBase
             );
         }
 
-        public void RemoveUserData(int[] keys)
+        public void RemoveUserData(ushort[] keys)
         {
-            var data = RemoveCore(memory.UserDataTable.GetRawDataUnsafe(), keys, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
-            var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
+            var data = RemoveCore(memory.UserDataTable.GetRawDataUnsafe(), keys, x => x.GlobalUserId, System.Collections.Generic.Comparer<ushort>.Default);
+            var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<ushort>.Default);
             var table = new UserDataTable(newData);
             memory = new MemoryDatabase(
                 memory.RoomServerInfoTable,
@@ -85,8 +85,8 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public void Diff(UserData[] addOrReplaceData)
         {
-            var data = DiffCore(memory.UserDataTable.GetRawDataUnsafe(), addOrReplaceData, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
-            var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<int>.Default);
+            var data = DiffCore(memory.UserDataTable.GetRawDataUnsafe(), addOrReplaceData, x => x.GlobalUserId, System.Collections.Generic.Comparer<ushort>.Default);
+            var newData = CloneAndSortBy(data, x => x.GlobalUserId, System.Collections.Generic.Comparer<ushort>.Default);
             var table = new UserDataTable(newData);
             memory = new MemoryDatabase(
                 memory.RoomServerInfoTable,
