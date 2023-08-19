@@ -19,7 +19,7 @@ public abstract class Server
     protected Server()
     {
         Occupants = 0;
-        UniTask.Run(async () =>
+        UniTask.Run(() =>
         {
             while(_available)
             {
@@ -27,7 +27,6 @@ public abstract class Server
                 {
                     Occupants = DataBaseManager.GetUsers(RoomId).Count;
                 }
-                await Task.Delay(1000);
             }
         });
     }
