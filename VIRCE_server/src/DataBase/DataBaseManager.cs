@@ -1,4 +1,5 @@
-﻿using MasterMemory;
+﻿using Cysharp.Threading.Tasks;
+using MasterMemory;
 using VIRCE_server.MasterMemoryDataBase;
 
 namespace VIRCE_server.DataBase;
@@ -23,7 +24,7 @@ public static class DataBaseManager
         var builder = _db.ToImmutableBuilder();
         builder.Diff(new [] {userData});
         _db = builder.Build();
-        Save();
+        Save().Forget();
     }
     
     public static void RemoveUserData(in ushort userId, in int roomId)
@@ -35,7 +36,7 @@ public static class DataBaseManager
         });
         _db = builder.Build();
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
-        Save();
+        Save().Forget();
     }
 
     public static void RemoveUserData(in UserData userData)
@@ -53,7 +54,7 @@ public static class DataBaseManager
         var builder = _db.ToImmutableBuilder();
         builder.Diff(new [] {roomServerInfo});
         _db = builder.Build();
-        Save();
+        Save().Forget();
     }
     
     public static void RemoveRoomServerInfo(in ushort roomId)
@@ -64,7 +65,7 @@ public static class DataBaseManager
         });
         _db = builder.Build();
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
-        Save();
+        Save().Forget();
     }
     
     public static void RemoveRoomServerInfo(in RoomServerInfo roomServerInfo)
@@ -72,10 +73,17 @@ public static class DataBaseManager
         RemoveRoomServerInfo(roomServerInfo.RoomId);
     }
     
-    private static async void Save()
+    private static async UniTask Save()
     {
         var bytes = _builder.Build();
-        await File.WriteAllBytesAsync(DbSavePath, bytes);
+        try
+        {
+            await File.WriteAllBytesAsync(DbSavePath, bytes);
+        }
+        catch
+        {
+            // ignored
+        }
     }
     
     public static UserData GetUserData(in byte userId, in byte roomId)
