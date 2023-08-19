@@ -21,6 +21,7 @@ public class LobbyRoomCluster : ServerCluster
         server = Servers.OrderBy(s => s.Occupants).First();
         if (server.Occupants >= 24)
         {
+            Console.WriteLine("New LobbyRoom Created");
             server = new LobbyRoom();
             AddServer(server);
             server.Start();
