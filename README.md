@@ -1,6 +1,13 @@
 ﻿# VIRCE server side application
 This is a repository for the VIRCE server side application.
 
+## Tech Stack
+- .NET 7.0
+- UniTask
+- MasterMemory
+- Docker
+- kubernetes
+
 ## Installation
 ### Requirements
 - .NET Runtime 7.0
@@ -10,6 +17,7 @@ This is a repository for the VIRCE server side application.
 2. Run `dotnet run` in the VIRCE_server directory
 
 ### Run with kubernetes
+You have to install kubernetes , if you want to run with kubernetes.
 1. Clone the repository
 2. Run `docker build -t virce_server:kubernetes .`
 3. Run `kubectl create namespace virce`
@@ -19,7 +27,10 @@ This is a repository for the VIRCE server side application.
 The server side application is a .NET 7.0 application.
 It uses the .NET Core framework and is written in C#.
 
-This application consists of a room servers for mini game and lobby and a matching server.
+This application consists of a matching server and a room servers for mini game and lobby.
+
+And this app has In Memory Database Server featured by MasterMemoryDatabase(CySharp).
+The servers are good perfomance by this Database Server.
 
 ### Room servers
 The room servers are responsible for the game logic.
