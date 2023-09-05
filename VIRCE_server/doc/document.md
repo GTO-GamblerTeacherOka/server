@@ -87,3 +87,13 @@ sequenceDiagram
     GS->>DB: Remove Player info
     GS->>OC: Notify Player Exited
 ```
+
+# Request Body
+
+## Match Making Request
+
+| indexes |  description   |
+|:-------:|:--------------:|
+|  0..3   |  Packet Flag   |
+|  4..7   | Lace or Battle |
+|   8..   | VRoid License  |
