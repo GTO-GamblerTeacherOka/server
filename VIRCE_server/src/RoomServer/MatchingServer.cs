@@ -6,29 +6,26 @@ namespace VIRCE_server.RoomServer;
 
 public class MatchingServer
 {
+    private const int Port = 5000;
     private static MatchingServer? _instance;
-    
+
     private readonly ServerCluster _lobbyServerCluster;
     private readonly ServerCluster _miniGameServerCluster;
-
-    private const int Port = 5000;
     private readonly UdpClient _udpClient;
-    public bool IsRunning { get; private set; }
 
-    public static MatchingServer Instance
-    {
-        get
-        {
-            return _instance ??= new MatchingServer();
-        }
-    }
-    
     private MatchingServer()
     {
         _lobbyServerCluster = new LobbyRoomCluster();
         _miniGameServerCluster = new MiniGameRoomCluster();
         _udpClient = new UdpClient(Port);
         IsRunning = false;
+    }
+
+    public bool IsRunning { get; private set; }
+
+    public static MatchingServer Instance
+    {
+        get { return _instance ??= new MatchingServer(); }
     }
 
     public void Start()
@@ -50,19 +47,27 @@ public class MatchingServer
         {
             if (IsRunning is false) break;
             var data = await _udpClient.ReceiveAsync();
-            var (rawHeader,rawBody) = DataParser.Split(data.Buffer);
+            ReceiveHandler(data).Forget();
+        }
+    }
+
+    private async UniTask ReceiveHandler(UdpReceiveResult res)
+    {
+        await UniTask.Run(() =>
+        {
+            var (rawHeader, rawBody) = DataParser.Split(res.Buffer);
             var header = DataParser.AnalyzeHeader(rawHeader);
-            if (header.flag != DataParser.Flag.RoomEntry) continue;
+            if (header.flag != DataParser.Flag.RoomEntry) return;
             var roomType = rawBody[0];
             switch (roomType)
             {
                 case 0:
-                    _lobbyServerCluster.Entry(data.RemoteEndPoint);
+                    _lobbyServerCluster.Entry(res.RemoteEndPoint);
                     break;
                 case 1:
-                    _miniGameServerCluster.Entry(data.RemoteEndPoint);
+                    _miniGameServerCluster.Entry(res.RemoteEndPoint);
                     break;
             }
-        }
+        });
     }
 }

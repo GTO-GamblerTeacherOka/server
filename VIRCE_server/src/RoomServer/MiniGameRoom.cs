@@ -9,10 +9,7 @@ public class MiniGameRoom : Server
 {
     public override void Start()
     {
-        if (UdpClient is null)
-        {
-            Bind();
-        }
+        if (UdpClient is null) Bind();
         RoomId = GetRoomId();
         ServerInfo = new RoomServerInfo
         {
@@ -24,7 +21,7 @@ public class MiniGameRoom : Server
         ReceiveStart().Forget();
         IsRunning = true;
     }
-    
+
     public override void Stop()
     {
         IsRunning = false;
