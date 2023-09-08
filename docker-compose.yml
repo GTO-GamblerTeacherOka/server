@@ -1,0 +1,26 @@
+﻿version: '3'
+
+services: 
+  virce-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+      - 8192:8192
+      - 8193:8193
+      - 8194:8194
+    networks:
+      - virce-network
+  
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - "./data/redis:/data"
+    networks:
+      - virce-network
+    
+networks:
+  virce-network:
