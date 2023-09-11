@@ -7,27 +7,25 @@ namespace VIRCE_server.RoomServer;
 
 public class LobbyRoom : Server
 {
+    public LobbyRoom(int port) : base(port)
+    {
+    }
+
     public override void Start()
     {
-        if (UdpClient is null)
-        {
-            Bind();
-        }
-        RoomId = GetRoomId();
+        if (UdpClient is null) Bind();
+        var roomId = GetRoomId();
         ServerInfo = new RoomServerInfo
         {
-            RoomId = RoomId,
-            Port = Port,
+            RoomId = roomId,
             Type = RoomServerInfo.ServerType.Lobby
         };
         DataBaseManager.AddRoomServerInfo(ServerInfo);
         ReceiveStart().Forget();
-        IsRunning = true;
     }
-    
+
     public override void Stop()
     {
-        IsRunning = false;
         UdpClient?.Close();
         UdpClient = null;
         DataBaseManager.RemoveRoomServerInfo(ServerInfo);

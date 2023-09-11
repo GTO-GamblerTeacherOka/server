@@ -8,15 +8,14 @@ public class MatchingServer
 {
     private const int Port = 5000;
     private static MatchingServer? _instance;
-
-    private readonly ServerCluster _lobbyServerCluster;
-    private readonly ServerCluster _miniGameServerCluster;
+    private readonly Server _lobbyServer;
+    private readonly Server _miniGameServer;
     private readonly UdpClient _udpClient;
 
     private MatchingServer()
     {
-        _lobbyServerCluster = new LobbyRoomCluster();
-        _miniGameServerCluster = new MiniGameRoomCluster();
+        _lobbyServer = new LobbyRoom(8192);
+        _miniGameServer = new MiniGameRoom(8193);
         _udpClient = new UdpClient(Port);
         IsRunning = false;
     }
@@ -30,8 +29,8 @@ public class MatchingServer
 
     public void Start()
     {
-        _lobbyServerCluster.Start();
-        _miniGameServerCluster.Start();
+        _lobbyServer.Start();
+        _miniGameServer.Start();
         IsRunning = true;
         ReceiveStart().Forget();
     }
@@ -62,10 +61,10 @@ public class MatchingServer
             switch (roomType)
             {
                 case 0:
-                    _lobbyServerCluster.Entry(res.RemoteEndPoint);
+                    _lobbyServer.Entry(res.RemoteEndPoint);
                     break;
                 case 1:
-                    _miniGameServerCluster.Entry(res.RemoteEndPoint);
+                    _miniGameServer.Entry(res.RemoteEndPoint);
                     break;
             }
         });

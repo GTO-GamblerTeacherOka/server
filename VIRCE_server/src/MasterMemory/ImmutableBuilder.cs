@@ -27,7 +27,7 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public void ReplaceAll(System.Collections.Generic.IList<RoomServerInfo> data)
         {
-            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<ushort>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
             var table = new RoomServerInfoTable(newData);
             memory = new MemoryDatabase(
                 table,
@@ -36,10 +36,10 @@ namespace VIRCE_server.MasterMemoryDataBase
             );
         }
 
-        public void RemoveRoomServerInfo(ushort[] keys)
+        public void RemoveRoomServerInfo(byte[] keys)
         {
-            var data = RemoveCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), keys, x => x.RoomId, System.Collections.Generic.Comparer<ushort>.Default);
-            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<ushort>.Default);
+            var data = RemoveCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), keys, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
             var table = new RoomServerInfoTable(newData);
             memory = new MemoryDatabase(
                 table,
@@ -50,8 +50,8 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public void Diff(RoomServerInfo[] addOrReplaceData)
         {
-            var data = DiffCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), addOrReplaceData, x => x.RoomId, System.Collections.Generic.Comparer<ushort>.Default);
-            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<ushort>.Default);
+            var data = DiffCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), addOrReplaceData, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
             var table = new RoomServerInfoTable(newData);
             memory = new MemoryDatabase(
                 table,

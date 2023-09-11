@@ -7,39 +7,24 @@ namespace VIRCE_server.RoomServer;
 
 public abstract class Server
 {
-    public int Port { get; private set; }
-    protected UdpClient? UdpClient;
-    public bool IsRunning { get; protected set; }
-    public byte RoomId { get; protected set; }
     protected RoomServerInfo ServerInfo = null!;
+    protected UdpClient? UdpClient;
 
-    public int Occupants { get; private set; }
-    private bool _available = true;
-
-    protected Server()
+    protected Server(int port)
     {
-        Occupants = 0;
-        UniTask.Run(() =>
-        {
-            while(_available)
-            {
-                if (IsRunning)
-                {
-                    Occupants = DataBaseManager.GetUsers(RoomId).Count;
-                }
-            }
-        });
+        Port = port;
     }
-    
+
+    public int Port { get; private set; }
+
     ~Server()
     {
-        _available = false;
-        Task.Delay(2000).Wait();
+        Stop();
     }
 
-    protected void Bind()
+    protected void Bind(int port = 0)
     {
-        UdpClient ??= new UdpClient(0);
+        UdpClient ??= new UdpClient(port);
         Port = (UdpClient.Client.LocalEndPoint as IPEndPoint)!.Port;
     }
 
@@ -48,20 +33,28 @@ public abstract class Server
         UniTask.Run(() =>
         {
             var roomMembers = DataBaseManager.GetUsers(roomId);
-            foreach (var roomMember in roomMembers)
-            {
-                UdpClient?.SendAsync(data, data.Length, roomMember.RemoteEndPoint);
-            }
+            foreach (var roomMember in roomMembers) UdpClient?.SendAsync(data, data.Length, roomMember.RemoteEndPoint);
         }, false);
     }
 
     public void Entry(in IPEndPoint endPoint)
     {
-        var userId = GetUserId();
+        var isLobby = this is LobbyRoom;
+        var roomIds = DataBaseManager.GetRooms()
+            .Where(info =>
+                info.Type == (isLobby ? RoomServerInfo.ServerType.Lobby : RoomServerInfo.ServerType.MiniGame))
+            .Select(info => info.RoomId).ToArray();
+        byte roomId = 0;
+        Parallel.ForEach(roomIds, id =>
+        {
+            if (roomId == 0 || DataBaseManager.GetUsers(id).Count < DataBaseManager.GetUsers(roomId).Count)
+                roomId = id;
+        });
+        var userId = GetUserId(roomId);
         var user = new UserData
         {
             UserId = userId,
-            RoomId = RoomId,
+            RoomId = roomId,
             RemoteEndPoint = endPoint
         };
         DataBaseManager.AddUserData(user);
@@ -70,9 +63,9 @@ public abstract class Server
         UdpClient?.SendAsync(msg, msg.Length, endPoint);
     }
 
-    protected static byte GetRoomId()
+    private static byte GetUserId(in byte roomId)
     {
-        var ids = DataBaseManager.GetRoomIds();
+        var ids = DataBaseManager.GetUsers(roomId).Select(data => data.UserId).ToArray();
         byte id = 1;
         while (true)
         {
@@ -81,10 +74,10 @@ public abstract class Server
         }
     }
 
-    private byte GetUserId()
+    protected static byte GetRoomId()
     {
-        var ids = DataBaseManager.GetUsers(RoomId).Select(data => data.UserId).ToArray();
         byte id = 1;
+        var ids = DataBaseManager.GetRoomIds();
         while (true)
         {
             if (!ids.Contains(id)) return id;
@@ -95,7 +88,7 @@ public abstract class Server
     protected async UniTask ReceiveStart()
     {
         if (UdpClient is null) return;
-        while(true)
+        while (true)
         {
             var res = await UdpClient.ReceiveAsync();
             UniTask.Run(() => OnReceive(res.RemoteEndPoint, res.Buffer), false);
