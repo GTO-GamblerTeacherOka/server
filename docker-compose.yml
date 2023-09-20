@@ -20,6 +20,7 @@ services:
     restart: always
     volumes:
         - "./data/mysql:/var/lib/mysql"
+        - "./MySQL:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: virce
@@ -51,6 +52,9 @@ services:
       - redis
       - mysql
       - loadbalancer
+    environment:
+      REDIS_HOST: 10.254.0.100
+      MYSQL_HOST: 10.254.0.200
     networks:
       virce-network:
         ipv4_address:
@@ -65,6 +69,9 @@ services:
       - redis
       - mysql
       - loadbalancer
+    environment:
+      REDIS_HOST: 10.254.0.100
+      MYSQL_HOST: 10.254.0.200
     networks:
       virce-network:
         ipv4_address:
@@ -79,12 +86,14 @@ services:
       - redis
       - mysql
       - loadbalancer
+    environment:
+      REDIS_HOST: 10.254.0.100
+      MYSQL_HOST: 10.254.0.200
     networks:
       virce-network:
         ipv4_address:
           10.254.0.13
   
-    
 networks:
   virce-network:
     ipam:
