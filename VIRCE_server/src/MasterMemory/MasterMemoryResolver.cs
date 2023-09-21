@@ -4,7 +4,6 @@ using MasterMemory.Validation;
 using MasterMemory;
 using MessagePack;
 using System.Collections.Generic;
-using System.Net;
 using System;
 using VIRCE_server.DataBase;
 using VIRCE_server.MasterMemoryDataBase.Tables;
