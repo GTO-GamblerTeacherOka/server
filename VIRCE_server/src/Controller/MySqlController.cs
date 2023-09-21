@@ -58,4 +58,26 @@ public static class MySqlController
         _connection.Execute(sql, data);
         _connection.Close();
     }
+
+    public static void Update<T>(in T data)
+    {
+        if (_connection is null)
+        {
+            Initialize();
+            return;
+        }
+
+        string sql;
+        if (typeof(T) == typeof(UserData) || typeof(T) == typeof(List<UserData>))
+            sql =
+                @"UPDATE User SET UserID = @UserID, RoomID = @RoomID, ModelID = @ModelID, DisplayName = @DisplayName, IPAddress = @IPAddress, Port = @Port WHERE UserID = @UserID AND RoomID = @RoomID";
+        else if (typeof(T) == typeof(RoomServerInfo) || typeof(T) == typeof(List<RoomServerInfo>))
+            sql = @"UPDATE Room SET RoomID = @RoomID, RoomType = @RoomType WHERE RoomID = @RoomID";
+        else
+            throw new Exception("Invalid Type");
+
+        _connection.Open();
+        _connection.Execute(sql, data);
+        _connection.Close();
+    }
 }
