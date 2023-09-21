@@ -1,5 +1,6 @@
-﻿using VIRCE_server.DataBase;
-using VIRCE_server.RoomServer;
+﻿using DotNetEnv;
+using VIRCE_server.Controller;
+using VIRCE_server.DataBase;
 
 namespace VIRCE_server;
 
@@ -7,10 +8,16 @@ internal static class VirceServer
 {
     private static async Task Main()
     {
-        var client = new HttpClient();
         Console.WriteLine("Starting...");
+        Init();
+        await Server.Server.Run();
+    }
+
+    private static void Init()
+    {
+        Env.Load("./.env");
         DataBaseManager.Initialize();
-        MatchingServer.Instance.Start();
-        while(MatchingServer.Instance.IsRunning){}
+        RedisController.Initialize();
+        MySqlController.Initialize();
     }
 }
