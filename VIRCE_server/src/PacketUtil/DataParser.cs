@@ -10,7 +10,6 @@ public static class DataParser
         RoomExit = 3,
         Reaction = 4,
         ChatData = 7,
-        RoomEntryRequest = 8
     }
 
     private const int HeaderSize = 2;
