@@ -23,11 +23,20 @@ public static class Matching
 
         var rooms = MySqlController.Query<RoomServerInfo>().ToArray();
         var users = MySqlController.Query<UserData>().ToArray();
-        
+
         var minUserRoom = rooms.Min(room => users.Count(user => user.RoomID == room.RoomID));
         roomId = rooms.First(room => users.Count(user => user.RoomID == room.RoomID) == minUserRoom).RoomID;
         var minUserRoomUsers = users.Where(user => user.RoomID == roomId).ToArray();
-        
+
+        if (minUserRoomUsers.Length > 31)
+        {
+            byte r = 1;
+            while (minUserRoomUsers.Any(user => user.UserID == r))
+                r++;
+            roomId = r;
+            minUserRoomUsers = Array.Empty<UserData>();
+        }
+
         for (byte i = 1; i <= 31; i++)
         {
             if (minUserRoomUsers.Any(user => user.UserID == i)) continue;
