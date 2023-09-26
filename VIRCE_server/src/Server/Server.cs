@@ -17,6 +17,7 @@ public static class Server
         while (_isRunning)
         {
             var recvData = await Socket.ReceiveAsync();
+            // 非同期で処理
             UniTask.Run(async () =>
             {
                 byte[] sendData;
@@ -30,6 +31,7 @@ public static class Server
                         Socket.SendAsync(sendData, recvData.RemoteEndPoint).Forget();
                         return;
                     case DataParser.Flag.PositionData:
+                        break;
                     case DataParser.Flag.AvatarData:
                         var user = MySqlController.Query<UserData>()
                             .First(u => u.UserID == userId && u.RoomID == roomId);
@@ -37,9 +39,19 @@ public static class Server
                         MySqlController.Update(user);
                         break;
                     case DataParser.Flag.RoomExit:
+                        ExitHandler(roomId, userId).Forget();
+                        break;
                     case DataParser.Flag.Reaction:
                     case DataParser.Flag.ChatData:
                         break;
+                    case DataParser.Flag.DisplayNameData:
+                        var user2 = MySqlController.Query<UserData>()
+                            .First(u => u.UserID == userId && u.RoomID == roomId);
+                        user2.DisplayName = Encoding.UTF8.GetString(body);
+                        MySqlController.Update(user2);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
 
                 var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId);
@@ -50,6 +62,16 @@ public static class Server
                 }
             });
         }
+    }
+
+    private static async UniTask ExitHandler(byte roomId, byte userId)
+    {
+        await UniTask.Run(() =>
+        {
+            MySqlController.DeleteUser(roomId, userId);
+            var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId);
+            if (users.Any()) MySqlController.DeleteRoom(roomId);
+        });
     }
 
     public static void Stop()
