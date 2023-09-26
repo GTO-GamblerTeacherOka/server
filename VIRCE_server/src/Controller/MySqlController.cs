@@ -19,10 +19,7 @@ public static class MySqlController
     public static IEnumerable<T> Query<T>()
     {
         if (_connection is null)
-        {
             Initialize();
-            return Enumerable.Empty<T>();
-        }
 
         string sql;
         if (typeof(T) == typeof(UserData))
@@ -31,7 +28,7 @@ public static class MySqlController
             sql = @"SELECT * FROM Room";
         else
             throw new Exception("Invalid Type");
-        _connection.Open();
+        _connection!.Open();
         var result = _connection.Query<T>(sql);
         _connection.Close();
         return result;
@@ -40,10 +37,7 @@ public static class MySqlController
     public static void Insert<T>(in T data)
     {
         if (_connection is null)
-        {
             Initialize();
-            return;
-        }
 
         string sql;
         if (typeof(T) == typeof(UserData) || typeof(T) == typeof(List<UserData>))
@@ -54,7 +48,7 @@ public static class MySqlController
         else
             throw new Exception("Invalid Type");
 
-        _connection.Open();
+        _connection!.Open();
         _connection.Execute(sql, data);
         _connection.Close();
     }
@@ -62,10 +56,7 @@ public static class MySqlController
     public static void Update<T>(in T data)
     {
         if (_connection is null)
-        {
             Initialize();
-            return;
-        }
 
         string sql;
         if (typeof(T) == typeof(UserData) || typeof(T) == typeof(List<UserData>))
@@ -76,8 +67,33 @@ public static class MySqlController
         else
             throw new Exception("Invalid Type");
 
-        _connection.Open();
+        _connection!.Open();
         _connection.Execute(sql, data);
+        _connection.Close();
+    }
+
+    public static void DeleteUser(byte roomId, byte userId)
+    {
+        if (_connection is null)
+            Initialize();
+
+        const string sql = @"DELETE FROM User WHERE UserID = @UserID AND RoomID = @RoomID";
+        _connection!.Open();
+        _connection.Execute(sql, new { UserID = userId, RoomID = roomId });
+        _connection.Close();
+    }
+
+    public static void DeleteRoom(byte roomId)
+    {
+        if (_connection is null)
+            Initialize();
+
+        _connection!.Open();
+
+        var users = _connection.Query<UserData>(@"SELECT * FROM User WHERE RoomID = @RoomID", new { RoomID = roomId });
+        if (users.Any()) throw new Exception("number of users is not zero");
+        const string sql = @"DELETE FROM Room WHERE RoomID = @RoomID";
+        _connection.Execute(sql, new { RoomID = roomId });
         _connection.Close();
     }
 }
