@@ -6,7 +6,9 @@ This is a repository for the VIRCE server side application.
 - UniTask
 - MasterMemory
 - Docker
-- kubernetes
+- docker compose
+- MySQL
+- Redis
 
 ## Installation
 ### Requirements
@@ -16,12 +18,24 @@ This is a repository for the VIRCE server side application.
 1. Clone the repository
 2. Run `dotnet run` in the VIRCE_server directory
 
+#### Annotation
+If you want to run in this way, you must install and run MySQL and Redis.
+So I recommend you to run with docker compose.
+
+### Run with docker compose
+You have to install docker Engine and docker compose , if you want to run with docker compose.
+1. Clone the repository.
+2. Run `docker-compose up -d` in the root directory.
+
 ### Run with kubernetes
 You have to install kubernetes , if you want to run with kubernetes.
 1. Clone the repository
 2. Run `docker build -t virce_server:kubernetes .`
 3. Run `kubectl create namespace virce`
 4. Run `kubectl apply -f kubernetes/deployment.yaml --namespace virce`
+
+#### Annotation
+I don't recommend you to run with kubernetes because the file for kubernetes is not maintained.
 
 ## architecture
 The server side application is a .NET 7.0 application.
