@@ -25,7 +25,8 @@ So I recommend you to run with docker compose.
 ### Run with docker compose
 You have to install docker Engine and docker compose , if you want to run with docker compose.
 1. Clone the repository.
-2. Run `docker-compose up -d` in the root directory.
+2. Run `docker-compose build` in the root directory.
+3. Run `docker-compose up` in the root directory.
 
 ### Run with kubernetes
 You have to install kubernetes , if you want to run with kubernetes.
