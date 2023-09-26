@@ -13,7 +13,7 @@ public class RoomServerInfo
         MiniGame = 1
     }
 
-    [PrimaryKey] public byte RoomId { get; set; }
+    [PrimaryKey] public byte RoomID { get; set; }
 
-    public ServerType Type { get; set; }
+    public ServerType RoomType { get; set; }
 }

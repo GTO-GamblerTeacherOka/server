@@ -4,7 +4,6 @@ using MasterMemory.Validation;
 using MasterMemory;
 using MessagePack;
 using System.Collections.Generic;
-using System.Net;
 using System;
 using VIRCE_server.DataBase;
 using VIRCE_server.MasterMemoryDataBase.Tables;
@@ -95,7 +94,7 @@ namespace VIRCE_server.MasterMemoryDataBase
             });
 
             ((ITableUniqueValidate)RoomServerInfoTable).ValidateUnique(result);
-            ValidateTable(RoomServerInfoTable.All, database, "RoomId", RoomServerInfoTable.PrimaryKeySelector, result);
+            ValidateTable(RoomServerInfoTable.All, database, "RoomID", RoomServerInfoTable.PrimaryKeySelector, result);
             ((ITableUniqueValidate)UserDataTable).ValidateUnique(result);
             ValidateTable(UserDataTable.All, database, "GlobalUserId", UserDataTable.PrimaryKeySelector, result);
 

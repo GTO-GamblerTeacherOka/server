@@ -4,7 +4,6 @@ using MasterMemory.Validation;
 using MasterMemory;
 using MessagePack;
 using System.Collections.Generic;
-using System.Net;
 using System;
 using VIRCE_server.DataBase;
 using VIRCE_server.MasterMemoryDataBase.Tables;
@@ -27,7 +26,7 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public void ReplaceAll(System.Collections.Generic.IList<RoomServerInfo> data)
         {
-            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomID, System.Collections.Generic.Comparer<byte>.Default);
             var table = new RoomServerInfoTable(newData);
             memory = new MemoryDatabase(
                 table,
@@ -38,8 +37,8 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public void RemoveRoomServerInfo(byte[] keys)
         {
-            var data = RemoveCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), keys, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
-            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
+            var data = RemoveCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), keys, x => x.RoomID, System.Collections.Generic.Comparer<byte>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomID, System.Collections.Generic.Comparer<byte>.Default);
             var table = new RoomServerInfoTable(newData);
             memory = new MemoryDatabase(
                 table,
@@ -50,8 +49,8 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public void Diff(RoomServerInfo[] addOrReplaceData)
         {
-            var data = DiffCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), addOrReplaceData, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
-            var newData = CloneAndSortBy(data, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
+            var data = DiffCore(memory.RoomServerInfoTable.GetRawDataUnsafe(), addOrReplaceData, x => x.RoomID, System.Collections.Generic.Comparer<byte>.Default);
+            var newData = CloneAndSortBy(data, x => x.RoomID, System.Collections.Generic.Comparer<byte>.Default);
             var table = new RoomServerInfoTable(newData);
             memory = new MemoryDatabase(
                 table,

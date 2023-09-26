@@ -4,7 +4,6 @@ using MasterMemory.Validation;
 using MasterMemory;
 using MessagePack;
 using System.Collections.Generic;
-using System.Net;
 using System;
 using VIRCE_server.DataBase;
 using VIRCE_server.MasterMemoryDataBase.Tables;
@@ -18,7 +17,7 @@ namespace VIRCE_server.MasterMemoryDataBase
 
         public DatabaseBuilder Append(System.Collections.Generic.IEnumerable<RoomServerInfo> dataSource)
         {
-            AppendCore(dataSource, x => x.RoomId, System.Collections.Generic.Comparer<byte>.Default);
+            AppendCore(dataSource, x => x.RoomID, System.Collections.Generic.Comparer<byte>.Default);
             return this;
         }
 

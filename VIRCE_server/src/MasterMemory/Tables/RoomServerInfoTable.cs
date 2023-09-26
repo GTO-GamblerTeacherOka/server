@@ -18,7 +18,7 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
         public RoomServerInfoTable(RoomServerInfo[] sortedData)
             : base(sortedData)
         {
-            this.primaryIndexSelector = x => x.RoomId;
+            this.primaryIndexSelector = x => x.RoomID;
             OnAfterConstruct();
         }
 
@@ -26,14 +26,14 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public RoomServerInfo FindByRoomId(byte key)
+        public RoomServerInfo FindByRoomID(byte key)
         {
             var lo = 0;
             var hi = data.Length - 1;
             while (lo <= hi)
             {
                 var mid = (int)(((uint)hi + (uint)lo) >> 1);
-                var selected = data[mid].RoomId;
+                var selected = data[mid].RoomID;
                 var found = (selected < key) ? -1 : (selected > key) ? 1 : 0;
                 if (found == 0) { return data[mid]; }
                 if (found < 0) { lo = mid + 1; }
@@ -43,14 +43,14 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool TryFindByRoomId(byte key, out RoomServerInfo result)
+        public bool TryFindByRoomID(byte key, out RoomServerInfo result)
         {
             var lo = 0;
             var hi = data.Length - 1;
             while (lo <= hi)
             {
                 var mid = (int)(((uint)hi + (uint)lo) >> 1);
-                var selected = data[mid].RoomId;
+                var selected = data[mid].RoomID;
                 var found = (selected < key) ? -1 : (selected > key) ? 1 : 0;
                 if (found == 0) { result = data[mid]; return true; }
                 if (found < 0) { lo = mid + 1; }
@@ -60,12 +60,12 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
             return false;
         }
 
-        public RoomServerInfo FindClosestByRoomId(byte key, bool selectLower = true)
+        public RoomServerInfo FindClosestByRoomID(byte key, bool selectLower = true)
         {
             return FindUniqueClosestCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<byte>.Default, key, selectLower);
         }
 
-        public RangeView<RoomServerInfo> FindRangeByRoomId(byte min, byte max, bool ascendant = true)
+        public RangeView<RoomServerInfo> FindRangeByRoomID(byte min, byte max, bool ascendant = true)
         {
             return FindUniqueRangeCore(data, primaryIndexSelector, System.Collections.Generic.Comparer<byte>.Default, min, max, ascendant);
         }
@@ -75,7 +75,7 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
         {
 #if !DISABLE_MASTERMEMORY_VALIDATOR
 
-            ValidateUniqueCore(data, primaryIndexSelector, "RoomId", resultSet);       
+            ValidateUniqueCore(data, primaryIndexSelector, "RoomID", resultSet);       
 
 #endif
         }
@@ -87,12 +87,12 @@ namespace VIRCE_server.MasterMemoryDataBase.Tables
             return new MasterMemory.Meta.MetaTable(typeof(RoomServerInfo), typeof(RoomServerInfoTable), "RoomServerInfo",
                 new MasterMemory.Meta.MetaProperty[]
                 {
-                    new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("RoomId")),
-                    new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("Type")),
+                    new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("RoomID")),
+                    new MasterMemory.Meta.MetaProperty(typeof(RoomServerInfo).GetProperty("RoomType")),
                 },
                 new MasterMemory.Meta.MetaIndex[]{
                     new MasterMemory.Meta.MetaIndex(new System.Reflection.PropertyInfo[] {
-                        typeof(RoomServerInfo).GetProperty("RoomId"),
+                        typeof(RoomServerInfo).GetProperty("RoomID"),
                     }, true, true, System.Collections.Generic.Comparer<byte>.Default),
                 });
         }

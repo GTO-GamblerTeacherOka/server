@@ -42,12 +42,12 @@ public static class DataBaseManager
 
     public static void RemoveUserData(in UserData userData)
     {
-        RemoveUserData(userData.UserId, userData.RoomId);
+        RemoveUserData(userData.UserID, userData.RoomID);
     }
 
     public static void AddRoomServerInfo(in RoomServerInfo roomServerInfo)
     {
-        if (_db.RoomServerInfoTable.FindByRoomId(roomServerInfo.RoomId) is not null)
+        if (_db.RoomServerInfoTable.FindByRoomID(roomServerInfo.RoomID) is not null)
             throw new Exception("RoomServer is already exist");
 
         var builder = _db.ToImmutableBuilder();
@@ -70,7 +70,7 @@ public static class DataBaseManager
 
     public static void RemoveRoomServerInfo(in RoomServerInfo roomServerInfo)
     {
-        RemoveRoomServerInfo(roomServerInfo.RoomId);
+        RemoveRoomServerInfo(roomServerInfo.RoomID);
     }
 
     private static async UniTask Save()
@@ -94,7 +94,7 @@ public static class DataBaseManager
 
     public static RangeView<UserData> GetUsers(in byte? roomId = null)
     {
-        return roomId is null ? _db.UserDataTable.All : _db.UserDataTable.FindByRoomId(roomId.Value);
+        return roomId is null ? _db.UserDataTable.All : _db.UserDataTable.FindByRoomID(roomId.Value);
     }
 
     public static RangeView<RoomServerInfo> GetRooms()
@@ -104,12 +104,12 @@ public static class DataBaseManager
 
     public static RoomServerInfo GetRoomFromRoomId(in byte roomId)
     {
-        return _db.RoomServerInfoTable.FindByRoomId(roomId);
+        return _db.RoomServerInfoTable.FindByRoomID(roomId);
     }
 
     public static byte[] GetRoomIds()
     {
-        var roomIds = _db.RoomServerInfoTable.All.Select(info => info.RoomId);
+        var roomIds = _db.RoomServerInfoTable.All.Select(info => info.RoomID);
 
         return roomIds.ToArray();
     }

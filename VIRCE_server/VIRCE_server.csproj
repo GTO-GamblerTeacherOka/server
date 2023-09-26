@@ -9,9 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Dapper" Version="2.0.151" />
+      <PackageReference Include="DotNetEnv" Version="2.5.0" />
       <PackageReference Include="MasterMemory" Version="2.4.4" />
       <PackageReference Include="MasterMemory.MSBuild.Tasks" Version="2.4.4" PrivateAssets="All" />
-      <PackageReference Include="UniTask" Version="2.3.3" />
+      <PackageReference Include="MySql.Data" Version="8.1.0" />
+      <PackageReference Include="NRedisStack" Version="0.9.0" />
+      <PackageReference Include="UniTask" Version="2.4.1" />
     </ItemGroup>
 
     <!-- Call code generator before-build. -->
