@@ -18,7 +18,6 @@ public static class Server
         _isRunning = true;
         while (_isRunning)
         {
-            Console.WriteLine("Waiting to receive data...");
             var recvData = await Socket.ReceiveAsync();
             ReceiveHandler(recvData).Forget();
         }
@@ -56,7 +55,7 @@ public static class Server
                 MySqlController.Update(user2);
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(recvData));
         }
 
         var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId);
