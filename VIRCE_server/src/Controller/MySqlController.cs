@@ -28,7 +28,8 @@ public static class MySqlController
             sql = @"SELECT * FROM Room";
         else
             throw new Exception("Invalid Type");
-        _connection!.Open();
+        if (_connection!.State != ConnectionState.Open)
+            _connection.Open();
         var result = _connection.Query<T>(sql);
         _connection.Close();
         return result;
@@ -48,7 +49,8 @@ public static class MySqlController
         else
             throw new Exception("Invalid Type");
 
-        _connection!.Open();
+        if (_connection!.State != ConnectionState.Open)
+            _connection.Open();
         _connection.Execute(sql, data);
         _connection.Close();
     }
@@ -67,7 +69,8 @@ public static class MySqlController
         else
             throw new Exception("Invalid Type");
 
-        _connection!.Open();
+        if (_connection!.State != ConnectionState.Open)
+            _connection.Open();
         _connection.Execute(sql, data);
         _connection.Close();
     }
@@ -78,7 +81,9 @@ public static class MySqlController
             Initialize();
 
         const string sql = @"DELETE FROM User WHERE UserID = @UserID AND RoomID = @RoomID";
-        _connection!.Open();
+
+        if (_connection!.State != ConnectionState.Open)
+            _connection.Open();
         _connection.Execute(sql, new { UserID = userId, RoomID = roomId });
         _connection.Close();
     }
@@ -88,7 +93,8 @@ public static class MySqlController
         if (_connection is null)
             Initialize();
 
-        _connection!.Open();
+        if (_connection!.State != ConnectionState.Open)
+            _connection.Open();
 
         var users = _connection.Query<UserData>(@"SELECT * FROM User WHERE RoomID = @RoomID", new { RoomID = roomId });
         if (users.Any()) throw new Exception("number of users is not zero");
