@@ -21,27 +21,41 @@ public static class Matching
             waitTime /= 2;
         }
 
-        var rooms = MySqlController.Query<RoomServerInfo>().ToArray();
-        var users = MySqlController.Query<UserData>().ToArray();
+        var rooms = MySqlController.Query<RoomServerInfo>().OrderBy(room => room.RoomID).ToArray(); // roomの配列
+        var users = MySqlController.Query<UserData>().ToArray(); // userの配列
 
-        var minUserRoom = rooms.Min(room => users.Count(user => user.RoomID == room.RoomID));
-        roomId = rooms.First(room => users.Count(user => user.RoomID == room.RoomID) == minUserRoom).RoomID;
-        var minUserRoomUsers = users.Where(user => user.RoomID == roomId).ToArray();
-
-        if (minUserRoomUsers.Length > 31)
+        if (rooms.Length == 0)
         {
-            byte r = 1;
-            while (minUserRoomUsers.Any(user => user.UserID == r))
-                r++;
-            roomId = r;
-            minUserRoomUsers = Array.Empty<UserData>();
+            roomId = 1;
+            var roomInfo = new RoomServerInfo { RoomID = roomId, RoomType = RoomServerInfo.ServerType.Lobby };
+            MySqlController.Insert(roomInfo);
+            userId = 1;
         }
-
-        for (byte i = 1; i <= 31; i++)
+        else
         {
-            if (minUserRoomUsers.Any(user => user.UserID == i)) continue;
-            userId = i;
-            break;
+            var minUserRoom = rooms.Min(room => users.Count(user => user.RoomID == room.RoomID));
+            var cheapRoom = rooms.First(room => users.Count(user => user.RoomID == room.RoomID) == minUserRoom);
+            roomId = cheapRoom.RoomID;
+            var minUserRoomUserIds = users.Where(user => user.RoomID == roomId).Select(user => user.UserID).ToArray();
+
+            if (minUserRoomUserIds.Length > 31)
+            {
+                byte r = 1;
+                foreach (var room in rooms)
+                    if (room.RoomID == r) r++;
+                    else break;
+                roomId = r;
+                var roomInfo = new RoomServerInfo { RoomID = roomId, RoomType = RoomServerInfo.ServerType.Lobby };
+                MySqlController.Insert(roomInfo);
+                minUserRoomUserIds = Array.Empty<byte>();
+            }
+
+            for (byte i = 1; i <= 31; i++)
+            {
+                if (minUserRoomUserIds.Any(user => user == i)) continue;
+                userId = i;
+                break;
+            }
         }
 
         var modelId = Encoding.UTF8.GetString(body);
