@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Dapper;
+﻿using Dapper;
 using DotNetEnv;
 using MySql.Data.MySqlClient;
 using VIRCE_server.DataBase;
@@ -8,18 +7,12 @@ namespace VIRCE_server.Controller;
 
 public static class MySqlController
 {
-    private static IDbConnection? _connection;
-
-    public static void Initialize()
-    {
-        var connectionString = $"Server={Env.GetString("MYSQL_HOST")};User ID=virce;Password=virce;Database=virce";
-        _connection = new MySqlConnection(connectionString);
-    }
+    private static readonly string ConnectionString =
+        $"Server={Env.GetString("MYSQL_HOST")};User ID=virce;Password=virce;Database=virce";
 
     public static IEnumerable<T> Query<T>()
     {
-        if (_connection is null)
-            Initialize();
+        using var connection = new MySqlConnection(ConnectionString);
 
         string sql;
         if (typeof(T) == typeof(UserData))
@@ -28,17 +21,16 @@ public static class MySqlController
             sql = @"SELECT * FROM Room";
         else
             throw new Exception("Invalid Type");
-        if (_connection!.State != ConnectionState.Open)
-            _connection.Open();
-        var result = _connection.Query<T>(sql);
-        _connection.Close();
+        // waiting for connection to close when opened
+        connection.Open();
+        var result = connection.Query<T>(sql);
+        connection.Close();
         return result;
     }
 
     public static void Insert<T>(in T data)
     {
-        if (_connection is null)
-            Initialize();
+        using var connection = new MySqlConnection(ConnectionString);
 
         string sql;
         if (typeof(T) == typeof(UserData) || typeof(T) == typeof(List<UserData>))
@@ -49,16 +41,14 @@ public static class MySqlController
         else
             throw new Exception("Invalid Type");
 
-        if (_connection!.State != ConnectionState.Open)
-            _connection.Open();
-        _connection.Execute(sql, data);
-        _connection.Close();
+        connection.Open();
+        connection.Execute(sql, data);
+        connection.Close();
     }
 
     public static void Update<T>(in T data)
     {
-        if (_connection is null)
-            Initialize();
+        using var connection = new MySqlConnection(ConnectionString);
 
         string sql;
         if (typeof(T) == typeof(UserData) || typeof(T) == typeof(List<UserData>))
@@ -69,37 +59,32 @@ public static class MySqlController
         else
             throw new Exception("Invalid Type");
 
-        if (_connection!.State != ConnectionState.Open)
-            _connection.Open();
-        _connection.Execute(sql, data);
-        _connection.Close();
+        connection.Open();
+        connection.Execute(sql, data);
+        connection.Close();
     }
 
     public static void DeleteUser(byte roomId, byte userId)
     {
-        if (_connection is null)
-            Initialize();
+        using var connection = new MySqlConnection(ConnectionString);
 
         const string sql = @"DELETE FROM User WHERE UserID = @UserID AND RoomID = @RoomID";
 
-        if (_connection!.State != ConnectionState.Open)
-            _connection.Open();
-        _connection.Execute(sql, new { UserID = userId, RoomID = roomId });
-        _connection.Close();
+        connection.Open();
+        connection.Execute(sql, new { UserID = userId, RoomID = roomId });
+        connection.Close();
     }
 
     public static void DeleteRoom(byte roomId)
     {
-        if (_connection is null)
-            Initialize();
+        using var connection = new MySqlConnection(ConnectionString);
 
-        if (_connection!.State != ConnectionState.Open)
-            _connection.Open();
+        connection.Open();
 
-        var users = _connection.Query<UserData>(@"SELECT * FROM User WHERE RoomID = @RoomID", new { RoomID = roomId });
+        var users = connection.Query<UserData>(@"SELECT * FROM User WHERE RoomID = @RoomID", new { RoomID = roomId });
         if (users.Any()) throw new Exception("number of users is not zero");
         const string sql = @"DELETE FROM Room WHERE RoomID = @RoomID";
-        _connection.Execute(sql, new { RoomID = roomId });
-        _connection.Close();
+        connection.Execute(sql, new { RoomID = roomId });
+        connection.Close();
     }
 }

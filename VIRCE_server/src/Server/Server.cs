@@ -33,7 +33,18 @@ public static class Server
                 var (isSuccess, userData) = await Matching.Request(recvData);
                 var sendData = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userData.UserID, userData.RoomID);
                 Socket.SendAsync(sendData, recvData.RemoteEndPoint).Forget();
-                return;
+
+                var roomUsers = MySqlController.Query<UserData>().Where(data => data.RoomID == userData.RoomID)
+                    .Where(data => data.UserID != userData.UserID);
+                foreach (var u in roomUsers)
+                {
+                    var h = DataParser.CreateHeader(DataParser.Flag.AvatarData, u.UserID, u.RoomID);
+                    var b = Encoding.UTF8.GetBytes(u.ModelID);
+                    var data = h.Concat(b).ToArray();
+                    Socket.SendAsync(data, recvData.RemoteEndPoint).Forget();
+                }
+
+                break;
             case DataParser.Flag.PositionData:
                 break;
             case DataParser.Flag.AvatarData:
@@ -46,6 +57,7 @@ public static class Server
                 ExitHandler(roomId, userId).Forget();
                 break;
             case DataParser.Flag.Reaction:
+                break;
             case DataParser.Flag.ChatData:
                 break;
             case DataParser.Flag.DisplayNameData:
@@ -58,7 +70,8 @@ public static class Server
                 throw new ArgumentOutOfRangeException(nameof(recvData));
         }
 
-        var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId);
+        var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId)
+            .Where(data => data.UserID != userId);
         foreach (var u in users)
         {
             var sendEndPoint = new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port);
