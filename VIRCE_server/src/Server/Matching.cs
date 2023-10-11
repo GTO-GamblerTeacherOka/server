@@ -58,7 +58,7 @@ public static class Matching
             }
         }
 
-        var modelId = Encoding.UTF8.GetString(body);
+        var modelId = Encoding.UTF8.GetString(body[1..]);
         var user = new UserData
         {
             DisplayName = "", IPAddress = recvData.RemoteEndPoint.Address.ToString(), ModelID = modelId,
