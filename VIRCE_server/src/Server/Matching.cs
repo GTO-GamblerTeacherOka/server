@@ -15,6 +15,7 @@ public static class Matching
         var waitTime = 2000;
         byte userId = 0;
         byte roomId = 0;
+        RedisController.SetString("matching", "1");
         while (!RedisController.SetNx("matching")) // マッチングの権限を取得
         {
             await Task.Delay(waitTime);
