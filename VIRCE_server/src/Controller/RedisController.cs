@@ -67,6 +67,6 @@ public static class RedisController
 
     public static bool SetNx(in string key)
     {
-        return _db!.StringSet(key, "1", TimeSpan.FromSeconds(1), When.NotExists, CommandFlags.None);
+        return _db!.StringSet(key, "100", TimeSpan.FromSeconds(1), When.NotExists, CommandFlags.None);
     }
 }

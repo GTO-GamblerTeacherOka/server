@@ -4,7 +4,7 @@ services:
   redis:
     image: redis:alpine
     ports:
-      - 6379:6379
+      - "6379:6379"
     restart: always
     volumes:
       - "./data/redis:/data"
@@ -16,7 +16,7 @@ services:
   mysql:
     image: mysql:latest
     ports:
-      - 3306:3306
+      - "3306:3306"
     restart: always
     volumes:
         - "./data/mysql:/var/lib/mysql"
@@ -34,7 +34,7 @@ services:
   loadbalancer:
     image: nginx:latest
     ports:
-      - 5000:5000/udp
+      - "5000:5000/udp"
     restart: always
     volumes:
       - "./nginx.conf:/etc/nginx/nginx.conf"
