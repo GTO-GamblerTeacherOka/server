@@ -8,5 +8,4 @@ RUN dotnet publish -c Release -o out ./VIRCE_server
 FROM mcr.microsoft.com/dotnet/runtime:7.0
 WORKDIR /VIRCE_server
 COPY --from=build-env /VIRCE_server/out .
-EXPOSE 5000/udp
 ENTRYPOINT ["dotnet", "VIRCE_server.dll"]

@@ -1,6 +1,7 @@
 ﻿using DotNetEnv;
 using VIRCE_server.Controller;
 using VIRCE_server.DataBase;
+using VIRCE_server.HealthCheck;
 
 namespace VIRCE_server;
 
@@ -18,5 +19,6 @@ internal static class VirceServer
         Env.Load("./.env");
         DataBaseManager.Initialize();
         RedisController.Initialize();
+        HealthCheckReceiver.Initialize();
     }
 }
