@@ -3,8 +3,6 @@
 services:
   redis:
     image: redis:alpine
-    ports:
-      - "6379:6379"
     restart: always
     volumes:
       - "./data/redis:/data"
@@ -15,8 +13,6 @@ services:
   
   mysql:
     image: mysql:latest
-    ports:
-      - "3306:3306"
     restart: always
     volumes:
         - "./data/mysql:/var/lib/mysql"
@@ -97,6 +93,6 @@ services:
 networks:
   virce-network:
     ipam:
-      driver: default
+      driver: bridge
       config:
         - subnet: 10.254.0.0/16
