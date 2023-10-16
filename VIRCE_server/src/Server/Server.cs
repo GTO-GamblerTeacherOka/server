@@ -30,7 +30,7 @@ public static class Server
         switch (flag)
         {
             case DataParser.Flag.RoomEntry:
-                var (isSuccess, userData) = await Matching.Request(recvData);
+                var (_, userData) = await Matching.Request(recvData);
                 roomId = userData.RoomID;
                 userId = userData.UserID;
                 header = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
@@ -39,7 +39,7 @@ public static class Server
 
                 var sendData = header.Concat(body).ToArray();
 
-                var roomUsers = MySqlController.Query<UserData>().Where(data => data.RoomID == userData.RoomID)
+                var roomUsers = (await MySqlController.Query<UserData>()).Where(data => data.RoomID == userData.RoomID)
                     .Where(data => data.UserID != userData.UserID);
                 foreach (var u in roomUsers)
                 {
@@ -55,10 +55,10 @@ public static class Server
             case DataParser.Flag.PositionData:
                 break;
             case DataParser.Flag.AvatarData:
-                var user = MySqlController.Query<UserData>()
+                var user = (await MySqlController.Query<UserData>())
                     .First(u => u.UserID == userId && u.RoomID == roomId);
                 user.ModelID = Encoding.UTF8.GetString(body);
-                MySqlController.Update(user);
+                await MySqlController.Update(user);
                 break;
             case DataParser.Flag.RoomExit:
                 ExitHandler(roomId, userId).Forget();
@@ -68,16 +68,16 @@ public static class Server
             case DataParser.Flag.ChatData:
                 break;
             case DataParser.Flag.DisplayNameData:
-                var user2 = MySqlController.Query<UserData>()
+                var user2 = (await MySqlController.Query<UserData>())
                     .First(u => u.UserID == userId && u.RoomID == roomId);
                 user2.DisplayName = Encoding.UTF8.GetString(body);
-                MySqlController.Update(user2);
+                await MySqlController.Update(user2);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(recvData));
         }
 
-        var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId)
+        var users = (await MySqlController.Query<UserData>()).Where(data => data.RoomID == roomId)
             .Where(user => user.UserID != userId);
         foreach (var u in users)
         {
@@ -88,12 +88,9 @@ public static class Server
 
     private static async UniTask ExitHandler(byte roomId, byte userId)
     {
-        await UniTask.Run(() =>
-        {
-            MySqlController.DeleteUser(roomId, userId);
-            var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId);
-            if (users.Any()) MySqlController.DeleteRoom(roomId);
-        });
+        await MySqlController.DeleteUser(roomId, userId);
+        var users = (await MySqlController.Query<UserData>()).Where(data => data.RoomID == roomId);
+        if (users.Any()) await MySqlController.DeleteRoom(roomId);
     }
 
     public static void Stop()

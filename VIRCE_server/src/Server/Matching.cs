@@ -14,7 +14,7 @@ public static class Matching
         var (_, body) = DataParser.Split(recvData.Buffer);
         var waitTime = 2000;
         byte userId = 0;
-        byte roomId = 0;
+        byte roomId;
         while (!RedisController.SetNx("matching")) // マッチングの権限を取得
         {
             await Task.Delay(waitTime);
@@ -23,14 +23,14 @@ public static class Matching
 
         RedisController.SetString("matching", "1");
 
-        var rooms = MySqlController.Query<RoomServerInfo>().OrderBy(room => room.RoomID).ToArray(); // roomの配列
-        var users = MySqlController.Query<UserData>().ToArray(); // userの配列
+        var rooms = (await MySqlController.Query<RoomServerInfo>()).OrderBy(room => room.RoomID).ToArray(); // roomの配列
+        var users = (await MySqlController.Query<UserData>()).ToArray(); // userの配列
 
         if (rooms.Length == 0)
         {
             roomId = 1;
             var roomInfo = new RoomServerInfo { RoomID = roomId, RoomType = RoomServerInfo.ServerType.Lobby };
-            MySqlController.Insert(roomInfo);
+            await MySqlController.Insert(roomInfo);
             userId = 1;
         }
         else
@@ -48,7 +48,7 @@ public static class Matching
                     else break;
                 roomId = r;
                 var roomInfo = new RoomServerInfo { RoomID = roomId, RoomType = RoomServerInfo.ServerType.Lobby };
-                MySqlController.Insert(roomInfo);
+                await MySqlController.Insert(roomInfo);
                 minUserRoomUserIds = Array.Empty<byte>();
             }
 
@@ -66,7 +66,7 @@ public static class Matching
             DisplayName = "", IPAddress = recvData.RemoteEndPoint.Address.ToString(), ModelID = modelId,
             Port = (ushort)recvData.RemoteEndPoint.Port, RoomID = roomId, UserID = userId
         };
-        MySqlController.Insert(user);
+        await MySqlController.Insert(user);
 
         RedisController.Remove("matching"); // マッチングの権限を削除
         return (true, user);

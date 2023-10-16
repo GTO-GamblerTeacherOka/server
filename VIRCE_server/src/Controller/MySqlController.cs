@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using Cysharp.Threading.Tasks;
+using Dapper;
 using DotNetEnv;
 using MySql.Data.MySqlClient;
 using VIRCE_server.DataBase;
@@ -10,9 +11,9 @@ public static class MySqlController
     private static readonly string ConnectionString =
         $"Server={Env.GetString("MYSQL_HOST")};User ID=virce;Password=virce;Database=virce";
 
-    public static IEnumerable<T> Query<T>()
+    public static async UniTask<IEnumerable<T>> Query<T>()
     {
-        using var connection = new MySqlConnection(ConnectionString);
+        var connection = new MySqlConnection(ConnectionString);
 
         try
         {
@@ -25,21 +26,25 @@ public static class MySqlController
                 throw new Exception("Invalid Type");
             // waiting for connection to close when opened
             connection.Open();
-            var result = connection.Query<T>(sql);
-            connection.Close();
+            var result = await connection.QueryAsync<T>(sql);
+            await connection.CloseAsync();
             return result;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            connection.Close();
+            await connection.CloseAsync();
             throw;
+        }
+        finally
+        {
+            await connection.DisposeAsync();
         }
     }
 
-    public static void Insert<T>(in T data)
+    public static async UniTask Insert<T>(T data)
     {
-        using var connection = new MySqlConnection(ConnectionString);
+        var connection = new MySqlConnection(ConnectionString);
         try
         {
             string sql;
@@ -52,20 +57,24 @@ public static class MySqlController
                 throw new Exception("Invalid Type");
 
             connection.Open();
-            connection.Execute(sql, data);
-            connection.Close();
+            await connection.ExecuteAsync(sql, data);
+            await connection.CloseAsync();
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            connection.Close();
+            await connection.CloseAsync();
             throw;
+        }
+        finally
+        {
+            await connection.DisposeAsync();
         }
     }
 
-    public static void Update<T>(in T data)
+    public static async UniTask Update<T>(T data)
     {
-        using var connection = new MySqlConnection(ConnectionString);
+        var connection = new MySqlConnection(ConnectionString);
 
         try
         {
@@ -79,40 +88,48 @@ public static class MySqlController
                 throw new Exception("Invalid Type");
 
             connection.Open();
-            connection.Execute(sql, data);
-            connection.Close();
+            await connection.ExecuteAsync(sql, data);
+            await connection.CloseAsync();
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            connection.Close();
+            await connection.CloseAsync();
             throw;
+        }
+        finally
+        {
+            await connection.DisposeAsync();
         }
     }
 
-    public static void DeleteUser(byte roomId, byte userId)
+    public static async UniTask DeleteUser(byte roomId, byte userId)
     {
-        using var connection = new MySqlConnection(ConnectionString);
+        var connection = new MySqlConnection(ConnectionString);
 
         try
         {
             const string sql = @"DELETE FROM User WHERE UserID = @UserID AND RoomID = @RoomID";
 
             connection.Open();
-            connection.Execute(sql, new { UserID = userId, RoomID = roomId });
-            connection.Close();
+            await connection.ExecuteAsync(sql, new { UserID = userId, RoomID = roomId });
+            await connection.CloseAsync();
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            connection.Close();
+            await connection.CloseAsync();
             throw;
+        }
+        finally
+        {
+            await connection.DisposeAsync();
         }
     }
 
-    public static void DeleteRoom(byte roomId)
+    public static async UniTask DeleteRoom(byte roomId)
     {
-        using var connection = new MySqlConnection(ConnectionString);
+        var connection = new MySqlConnection(ConnectionString);
 
         try
         {
@@ -120,16 +137,23 @@ public static class MySqlController
 
             var users = connection.Query<UserData>(@"SELECT * FROM User WHERE RoomID = @RoomID",
                 new { RoomID = roomId });
-            if (users.Any()) throw new Exception("number of users is not zero");
-            const string sql = @"DELETE FROM Room WHERE RoomID = @RoomID";
-            connection.Execute(sql, new { RoomID = roomId });
-            connection.Close();
+            if (!users.Any())
+            {
+                const string sql = @"DELETE FROM Room WHERE RoomID = @RoomID";
+                await connection.ExecuteAsync(sql, new { RoomID = roomId });
+            }
+
+            await connection.CloseAsync();
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            connection.Close();
+            await connection.CloseAsync();
             throw;
+        }
+        finally
+        {
+            await connection.DisposeAsync();
         }
     }
 }
