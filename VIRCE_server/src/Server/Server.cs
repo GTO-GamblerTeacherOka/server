@@ -31,8 +31,13 @@ public static class Server
         {
             case DataParser.Flag.RoomEntry:
                 var (isSuccess, userData) = await Matching.Request(recvData);
-                var sendData = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userData.UserID, userData.RoomID);
-                Socket.SendAsync(sendData, recvData.RemoteEndPoint).Forget();
+                roomId = userData.RoomID;
+                userId = userData.UserID;
+                header = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
+                var entryData = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
+                Socket.SendAsync(entryData, recvData.RemoteEndPoint).Forget();
+
+                var sendData = header.Concat(body).ToArray();
 
                 var roomUsers = MySqlController.Query<UserData>().Where(data => data.RoomID == userData.RoomID)
                     .Where(data => data.UserID != userData.UserID);
@@ -41,10 +46,12 @@ public static class Server
                     var h = DataParser.CreateHeader(DataParser.Flag.AvatarData, u.UserID, u.RoomID);
                     var b = Encoding.UTF8.GetBytes(u.ModelID);
                     var data = h.Concat(b).ToArray();
-                    Socket.SendAsync(data, recvData.RemoteEndPoint).Forget();
+                    Socket.SendAsync(data, recvData.RemoteEndPoint).Forget(); // send user data to new user
+                    Socket.SendAsync(sendData, new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port)).Forget();
                 }
 
-                break;
+                return;
+
             case DataParser.Flag.PositionData:
                 break;
             case DataParser.Flag.AvatarData:
@@ -70,8 +77,7 @@ public static class Server
                 throw new ArgumentOutOfRangeException(nameof(recvData));
         }
 
-        var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId)
-            .Where(data => data.UserID != userId);
+        var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId);
         foreach (var u in users)
         {
             var sendEndPoint = new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port);
