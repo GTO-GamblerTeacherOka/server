@@ -1,5 +1,6 @@
 ﻿using Cysharp.Threading.Tasks;
 using MasterMemory;
+using VIRCE_server.Controller;
 using VIRCE_server.MasterMemoryDataBase;
 
 namespace VIRCE_server.DataBase;
@@ -9,6 +10,7 @@ public static class DataBaseManager
     private const string DbSavePath = "./VIRECE_server_db.bytes";
     private static DatabaseBuilder _builder = new();
     private static MemoryDatabase _db;
+    private static bool _isStarted;
 
     static DataBaseManager()
     {
@@ -17,6 +19,34 @@ public static class DataBaseManager
 
     public static void Initialize()
     {
+    }
+
+    public static void StartCache()
+    {
+        if (_isStarted) return;
+        _isStarted = true;
+        UniTask.Run(() =>
+        {
+            while (_isStarted)
+            {
+                Cache().Forget();
+                Task.Delay(1000);
+            }
+        }).Forget();
+    }
+
+    private static async UniTask Cache()
+    {
+        var users = await MySqlController.Query<UserData>();
+        var roomServerInfos = await MySqlController.Query<RoomServerInfo>();
+
+        var builder = _db.ToImmutableBuilder();
+        builder.ReplaceAll(users.ToArray());
+        builder.ReplaceAll(roomServerInfos.ToArray());
+        _db = builder.Build();
+        _builder = _db.ToDatabaseBuilder();
+
+        Save().Forget();
     }
 
     public static void AddUserData(in UserData userData)

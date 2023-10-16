@@ -18,5 +18,6 @@ internal static class VirceServer
         Env.Load("./.env");
         DataBaseManager.Initialize();
         RedisController.Initialize();
+        DataBaseManager.StartCache();
     }
 }
