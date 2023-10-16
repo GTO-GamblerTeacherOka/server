@@ -77,7 +77,8 @@ public static class Server
                 throw new ArgumentOutOfRangeException(nameof(recvData));
         }
 
-        var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId);
+        var users = MySqlController.Query<UserData>().Where(data => data.RoomID == roomId)
+            .Where(user => user.UserID != userId);
         foreach (var u in users)
         {
             var sendEndPoint = new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port);
