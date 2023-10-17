@@ -30,7 +30,7 @@ public static class DataBaseManager
             while (_isStarted)
             {
                 Cache().Forget();
-                Task.Delay(1000);
+                Task.Delay(500);
             }
         }).Forget();
     }
