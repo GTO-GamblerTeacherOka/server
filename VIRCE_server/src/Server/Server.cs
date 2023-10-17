@@ -27,31 +27,43 @@ public static class Server
     {
         var (header, body) = DataParser.Split(recvData.Buffer);
         var (flag, userId, roomId) = DataParser.AnalyzeHeader(header);
+        if (flag is DataParser.Flag.RoomEntry)
+        {
+            var (_, userData) = await Matching.Request(recvData);
+            roomId = userData.RoomID;
+            userId = userData.UserID;
+            header = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
+            var entryData = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
+            Socket.SendAsync(entryData, recvData.RemoteEndPoint).Forget();
+
+            var sendData = header.Concat(body).ToArray();
+
+            var roomUsers = (await MySqlController.Query<UserData>()).Where(data => data.RoomID == userData.RoomID)
+                .Where(data => data.UserID != userData.UserID);
+            foreach (var u in roomUsers)
+            {
+                var h = DataParser.CreateHeader(DataParser.Flag.AvatarData, u.UserID, u.RoomID);
+                var b = Encoding.UTF8.GetBytes(u.ModelID);
+                var data = h.Concat(b).ToArray();
+                Socket.SendAsync(data, recvData.RemoteEndPoint).Forget(); // send user data to new user
+                Socket.SendAsync(sendData, new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port)).Forget();
+            }
+
+            return;
+        }
+
+        UniTask.Run(() =>
+        {
+            var users = DataBaseManager.GetUsers(roomId).Where(user => user.UserID != userId);
+            foreach (var u in users)
+            {
+                var sendEndPoint = new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port);
+                Socket.SendAsync(recvData.Buffer, sendEndPoint).Forget();
+            }
+        });
+
         switch (flag)
         {
-            case DataParser.Flag.RoomEntry:
-                var (_, userData) = await Matching.Request(recvData);
-                roomId = userData.RoomID;
-                userId = userData.UserID;
-                header = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
-                var entryData = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
-                Socket.SendAsync(entryData, recvData.RemoteEndPoint).Forget();
-
-                var sendData = header.Concat(body).ToArray();
-
-                var roomUsers = (await MySqlController.Query<UserData>()).Where(data => data.RoomID == userData.RoomID)
-                    .Where(data => data.UserID != userData.UserID);
-                foreach (var u in roomUsers)
-                {
-                    var h = DataParser.CreateHeader(DataParser.Flag.AvatarData, u.UserID, u.RoomID);
-                    var b = Encoding.UTF8.GetBytes(u.ModelID);
-                    var data = h.Concat(b).ToArray();
-                    Socket.SendAsync(data, recvData.RemoteEndPoint).Forget(); // send user data to new user
-                    Socket.SendAsync(sendData, new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port)).Forget();
-                }
-
-                return;
-
             case DataParser.Flag.PositionData:
                 break;
             case DataParser.Flag.AvatarData:
@@ -68,21 +80,13 @@ public static class Server
             case DataParser.Flag.ChatData:
                 break;
             case DataParser.Flag.DisplayNameData:
-                var user2 = (await MySqlController.Query<UserData>())
-                    .First(u => u.UserID == userId && u.RoomID == roomId);
+                var user2 = DataBaseManager.GetUserData(userId, roomId);
                 user2.DisplayName = Encoding.UTF8.GetString(body);
                 await MySqlController.Update(user2);
                 break;
+            case DataParser.Flag.RoomEntry:
             default:
                 throw new ArgumentOutOfRangeException(nameof(recvData));
-        }
-
-        var users = (await MySqlController.Query<UserData>()).Where(data => data.RoomID == roomId)
-            .Where(user => user.UserID != userId);
-        foreach (var u in users)
-        {
-            var sendEndPoint = new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port);
-            Socket.SendAsync(recvData.Buffer, sendEndPoint).Forget();
         }
     }
 
