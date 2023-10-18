@@ -38,7 +38,7 @@ public static class Server
                 var entryData = DataParser.CreateHeader(DataParser.Flag.RoomEntry, userId, roomId);
                 Socket.SendAsync(entryData, recvData.RemoteEndPoint).Forget();
 
-                var sendData = header.Concat(body).ToArray();
+                var sendData = header.Concat(Encoding.UTF8.GetBytes(userData.ModelID)).ToArray();
 
                 var roomUsers = (await MySqlController.Query<UserData>())
                     .Where(data => data.RoomID == userData.RoomID)
