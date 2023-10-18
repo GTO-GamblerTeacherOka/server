@@ -18,8 +18,8 @@ public static class Socket
         await UdpClient.SendAsync(data, data.Length, endPoint);
     }
 
-    public static async UniTask<UdpReceiveResult> ReceiveAsync()
+    public static Task<UdpReceiveResult> ReceiveAsync()
     {
-        return await UdpClient.ReceiveAsync();
+        return UdpClient.ReceiveAsync();
     }
 }

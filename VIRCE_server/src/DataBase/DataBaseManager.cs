@@ -7,7 +7,7 @@ namespace VIRCE_server.DataBase;
 
 public static class DataBaseManager
 {
-    private const string DbSavePath = "./VIRECE_server_db.bytes";
+    private const int CacheTimeSpan = 3000;
     private static DatabaseBuilder _builder = new();
     private static MemoryDatabase _db;
     private static bool _isStarted;
@@ -19,9 +19,10 @@ public static class DataBaseManager
 
     public static void Initialize()
     {
+        StartCache();
     }
 
-    public static void StartCache()
+    private static void StartCache()
     {
         if (_isStarted) return;
         _isStarted = true;
@@ -30,7 +31,7 @@ public static class DataBaseManager
             while (_isStarted)
             {
                 Cache().Forget();
-                Task.Delay(500);
+                Task.Delay(CacheTimeSpan);
             }
         }).Forget();
     }
@@ -45,8 +46,6 @@ public static class DataBaseManager
         builder.ReplaceAll(roomServerInfos.ToArray());
         _db = builder.Build();
         _builder = _db.ToDatabaseBuilder();
-
-        Save().Forget();
     }
 
     public static void AddUserData(in UserData userData)
@@ -54,7 +53,6 @@ public static class DataBaseManager
         var builder = _db.ToImmutableBuilder();
         builder.Diff(new[] { userData });
         _db = builder.Build();
-        Save().Forget();
     }
 
     public static void RemoveUserData(in ushort userId, in int roomId)
@@ -67,7 +65,6 @@ public static class DataBaseManager
         });
         _db = builder.Build();
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
-        Save().Forget();
     }
 
     public static void RemoveUserData(in UserData userData)
@@ -83,7 +80,6 @@ public static class DataBaseManager
         var builder = _db.ToImmutableBuilder();
         builder.Diff(new[] { roomServerInfo });
         _db = builder.Build();
-        Save().Forget();
     }
 
     public static void RemoveRoomServerInfo(in byte roomId)
@@ -95,25 +91,11 @@ public static class DataBaseManager
         });
         _db = builder.Build();
         _builder = _db?.ToDatabaseBuilder() ?? _builder;
-        Save().Forget();
     }
 
     public static void RemoveRoomServerInfo(in RoomServerInfo roomServerInfo)
     {
         RemoveRoomServerInfo(roomServerInfo.RoomID);
-    }
-
-    private static async UniTask Save()
-    {
-        var bytes = _builder.Build();
-        try
-        {
-            await File.WriteAllBytesAsync(DbSavePath, bytes);
-        }
-        catch
-        {
-            // ignored
-        }
     }
 
     public static UserData GetUserData(in byte userId, in byte roomId)
