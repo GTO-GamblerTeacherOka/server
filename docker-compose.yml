@@ -52,6 +52,6 @@ services:
 networks:
   virce-network:
     ipam:
-      driver: bridge
+      driver: default
       config:
         - subnet: 10.254.0.0/16

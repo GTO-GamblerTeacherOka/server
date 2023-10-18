@@ -28,11 +28,6 @@ public static class DataParser
         return (flag, uid, rid);
     }
 
-    public static ushort GetGlobalUserId(in byte userId, in byte roomId)
-    {
-        return (ushort)(userId | (roomId << 5));
-    }
-
     public static byte[] CreateHeader(in Flag flag, in byte userId, in byte roomId)
     {
         var data = new byte[2];
