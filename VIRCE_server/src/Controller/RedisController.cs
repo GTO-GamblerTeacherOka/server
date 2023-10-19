@@ -20,9 +20,9 @@ public static class RedisController
         _db!.StringSet(key, value);
     }
 
-    public static string GetString(in string key)
+    public static string? GetString(in string key)
     {
-        return _db!.StringGet(key)!;
+        return _db!.StringGet(key);
     }
 
     public static void SetHash(in string key, in HashEntry[] hashEntries)

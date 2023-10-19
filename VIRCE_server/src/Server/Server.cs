@@ -88,7 +88,7 @@ public static class Server
                     break;
                 case DataParser.Flag.RoomExit:
                     ExitHandler(roomId, userId).Forget();
-                    break;
+                    return;
                 case DataParser.Flag.Reaction:
                     break;
                 case DataParser.Flag.ChatData:
@@ -110,6 +110,7 @@ public static class Server
     private static async UniTask ExitHandler(byte roomId, byte userId)
     {
         await MySqlController.DeleteUser(roomId, userId);
+        RedisController.Remove(DataParser.GetGlobalUserId(userId, roomId).ToString());
         var users = (await MySqlController.Query<UserData>()).Where(data => data.RoomID == roomId);
         if (users.Any()) await MySqlController.DeleteRoom(roomId);
     }

@@ -9,6 +9,7 @@ namespace VIRCE_server.DataBase;
 public static class DataBaseManager
 {
     private const int CacheTimeSpan = 3000;
+    private const int TimeoutTimeSpan = 20;
     private static DatabaseBuilder _builder = new();
     private static MemoryDatabase _db;
     private static bool _isStarted;
@@ -27,7 +28,7 @@ public static class DataBaseManager
     {
         if (_isStarted) return;
         _isStarted = true;
-        UniTask.Run(() =>
+        UniTask.Run(async () =>
         {
             while (_isStarted)
             {
@@ -37,15 +38,18 @@ public static class DataBaseManager
                 {
                     var globalUserId = DataParser.GetGlobalUserId(user.UserID, user.RoomID);
                     var lastTimeString = RedisController.GetString(globalUserId.ToString());
-                    if (lastTimeString.Length is 0) continue;
+                    if (lastTimeString is null) continue;
+                    Console.WriteLine($"lastTime : {lastTimeString}, userId : {user.UserID}, roomId : {user.RoomID}");
                     var lastTime = int.Parse(lastTimeString);
                     var now = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-                    if (lastTime + 20 <= now) continue;
+                    if (lastTime + TimeoutTimeSpan >= now) continue;
                     RemoveUserData(user);
                     MySqlController.DeleteUser(user.RoomID, user.UserID).Forget();
+                    RedisController.Remove(globalUserId.ToString());
+                    Console.WriteLine("delete user");
                 }
 
-                Task.Delay(CacheTimeSpan);
+                await Task.Delay(CacheTimeSpan);
             }
         }).Forget();
     }
