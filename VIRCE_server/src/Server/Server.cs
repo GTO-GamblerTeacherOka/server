@@ -27,6 +27,7 @@ public static class Server
     {
         var (header, body) = DataParser.Split(recvData.Buffer);
         var (flag, userId, roomId) = DataParser.AnalyzeHeader(header);
+
         if (flag is DataParser.Flag.RoomEntry)
         {
             UniTask.Run(async () =>
@@ -102,6 +103,8 @@ public static class Server
                     throw new ArgumentOutOfRangeException(nameof(recvData));
             }
         }
+
+        SetLateTime(DataParser.GetGlobalUserId(userId, roomId)).Forget();
     }
 
     private static async UniTask ExitHandler(byte roomId, byte userId)
@@ -114,5 +117,14 @@ public static class Server
     public static void Stop()
     {
         _isRunning = false;
+    }
+
+    private static async UniTask SetLateTime(ushort globalId)
+    {
+        await UniTask.Run(() =>
+        {
+            RedisController.SetString(globalId.ToString(),
+                ((int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds).ToString());
+        });
     }
 }

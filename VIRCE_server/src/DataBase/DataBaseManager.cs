@@ -2,6 +2,7 @@
 using MasterMemory;
 using VIRCE_server.Controller;
 using VIRCE_server.MasterMemoryDataBase;
+using VIRCE_server.PacketUtil;
 
 namespace VIRCE_server.DataBase;
 
@@ -19,10 +20,10 @@ public static class DataBaseManager
 
     public static void Initialize()
     {
-        StartCache();
+        Start();
     }
 
-    private static void StartCache()
+    private static void Start()
     {
         if (_isStarted) return;
         _isStarted = true;
@@ -31,6 +32,19 @@ public static class DataBaseManager
             while (_isStarted)
             {
                 Cache().Forget();
+                var users = _db.UserDataTable.All;
+                foreach (var user in users)
+                {
+                    var globalUserId = DataParser.GetGlobalUserId(user.UserID, user.RoomID);
+                    var lastTimeString = RedisController.GetString(globalUserId.ToString());
+                    if (lastTimeString.Length is 0) continue;
+                    var lastTime = int.Parse(lastTimeString);
+                    var now = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+                    if (lastTime + 20 <= now) continue;
+                    RemoveUserData(user);
+                    MySqlController.DeleteUser(user.RoomID, user.UserID).Forget();
+                }
+
                 Task.Delay(CacheTimeSpan);
             }
         }).Forget();
