@@ -35,4 +35,9 @@ public static class DataParser
         data[1] = (byte)(((userId & 0b0001_0000) >> 4) | ((roomId & 0b0111_1111) << 1));
         return data;
     }
+
+    public static ushort GetGlobalUserId(in byte userId, in byte roomId)
+    {
+        return (ushort)(userId | (roomId << 5));
+    }
 }
