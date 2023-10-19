@@ -11,20 +11,13 @@ metadata:
     - apiVersion: apps/v1
       fieldsType: FieldsV1
       fieldsV1:
-        'f:spec':
-          'f:replicas': {}
-      manager: vpa-recommender
-      operation: Update
-      subresource: scale
-    - apiVersion: apps/v1
-      fieldsType: FieldsV1
-      fieldsV1:
         'f:metadata':
           'f:labels':
             .: {}
             'f:app': {}
         'f:spec':
           'f:progressDeadlineSeconds': {}
+          'f:replicas': {}
           'f:revisionHistoryLimit': {}
           'f:selector': {}
           'f:strategy':
@@ -69,7 +62,7 @@ metadata:
               'f:terminationGracePeriodSeconds': {}
       manager: GoogleCloudConsole
       operation: Update
-      time: '2023-10-19T18:10:54Z'
+      time: '2023-10-19T19:25:04Z'
     - apiVersion: apps/v1
       fieldsType: FieldsV1
       fieldsV1:
@@ -103,11 +96,11 @@ metadata:
       manager: kube-controller-manager
       operation: Update
       subresource: status
-      time: '2023-10-19T18:19:41Z'
+      time: '2023-10-19T19:27:36Z'
   name: virce-server
   namespace: default
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: virce-server
@@ -127,12 +120,12 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: MYSQL_HOST
-                  name: virce-server-config-rkje
+                  name: virce-server-config-dvev
             - name: REDIS_HOST
               valueFrom:
                 configMapKeyRef:
                   key: REDIS_HOST
-                  name: virce-server-config-rkje
+                  name: virce-server-config-dvev
           image: gcr.io/virce-401702/github.com/gto-gamblerteacheroka/server
           imagePullPolicy: IfNotPresent
           name: server-1
@@ -181,7 +174,7 @@ metadata:
             'f:name': {}
       manager: GoogleCloudConsole
       operation: Update
-      time: '2023-10-19T18:10:55Z'
+      time: '2023-10-19T19:25:04Z'
     - apiVersion: autoscaling/v2
       fieldsType: FieldsV1
       fieldsV1:
@@ -212,12 +205,11 @@ metadata:
           'f:currentMetrics': {}
           'f:currentReplicas': {}
           'f:desiredReplicas': {}
-          'f:lastScaleTime': {}
       manager: vpa-recommender
       operation: Update
       subresource: status
-      time: '2023-10-19T18:24:11Z'
-  name: virce-server-hpa-73pp
+      time: '2023-10-19T19:29:36Z'
+  name: virce-server-hpa-deav
   namespace: default
 spec:
   maxReplicas: 5
@@ -267,7 +259,7 @@ metadata:
           'f:type': {}
       manager: GoogleCloudConsole
       operation: Update
-      time: '2023-10-16T03:59:23Z'
+      time: '2023-10-19T19:26:07Z'
     - apiVersion: v1
       fieldsType: FieldsV1
       fieldsV1:
@@ -281,33 +273,21 @@ metadata:
       manager: cloud-controller-manager
       operation: Update
       subresource: status
-      time: '2023-10-16T04:00:05Z'
-    - apiVersion: v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:metadata':
-          'f:annotations':
-            'f:gcb-build-id': {}
-            'f:kubectl.kubernetes.io/last-applied-configuration': {}
-          'f:labels':
-            'f:app.kubernetes.io/version': {}
-      manager: kubectl-client-side-apply
-      operation: Update
-      time: '2023-10-19T17:31:01Z'
+      time: '2023-10-19T19:26:55Z'
   name: virce-server-service
   namespace: default
 spec:
   allocateLoadBalancerNodePorts: true
-  clusterIP: 34.118.236.72
+  clusterIP: 34.118.236.195
   clusterIPs:
-    - 34.118.236.72
+    - 34.118.236.195
   externalTrafficPolicy: Cluster
   internalTrafficPolicy: Cluster
   ipFamilies:
     - IPv4
   ipFamilyPolicy: SingleStack
   ports:
-    - nodePort: 31506
+    - nodePort: 32504
       port: 5000
       protocol: UDP
       targetPort: 5000
