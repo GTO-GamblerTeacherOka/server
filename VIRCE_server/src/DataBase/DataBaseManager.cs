@@ -1,8 +1,10 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System.Net;
+using Cysharp.Threading.Tasks;
 using MasterMemory;
 using VIRCE_server.Controller;
 using VIRCE_server.MasterMemoryDataBase;
 using VIRCE_server.PacketUtil;
+using VIRCE_server.Server;
 
 namespace VIRCE_server.DataBase;
 
@@ -39,14 +41,12 @@ public static class DataBaseManager
                     var globalUserId = DataParser.GetGlobalUserId(user.UserID, user.RoomID);
                     var lastTimeString = RedisController.GetString(globalUserId.ToString());
                     if (lastTimeString is null) continue;
-                    Console.WriteLine($"lastTime : {lastTimeString}, userId : {user.UserID}, roomId : {user.RoomID}");
                     var lastTime = int.Parse(lastTimeString);
                     var now = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
                     if (lastTime + TimeoutTimeSpan >= now) continue;
                     RemoveUserData(user);
-                    MySqlController.DeleteUser(user.RoomID, user.UserID).Forget();
-                    RedisController.Remove(globalUserId.ToString());
-                    Console.WriteLine("delete user");
+                    var data = DataParser.CreateHeader(DataParser.Flag.RoomExit, user.UserID, user.RoomID);
+                    Socket.SendAsync(data, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5000)).Forget();
                 }
 
                 await Task.Delay(CacheTimeSpan);
