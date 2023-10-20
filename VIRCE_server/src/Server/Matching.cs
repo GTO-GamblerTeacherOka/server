@@ -12,14 +12,8 @@ public static class Matching
     public static async UniTask<(bool success, UserData user)> Request(UdpReceiveResult recvData)
     {
         var (_, body) = DataParser.Split(recvData.Buffer);
-        var waitTime = 2000;
         byte userId = 0;
         byte roomId;
-        while (!RedisController.SetNx("matching")) // マッチングの権限を取得
-        {
-            await Task.Delay(waitTime);
-            waitTime /= 2;
-        }
 
         RedisController.SetString("matching", "1");
 
@@ -67,8 +61,6 @@ public static class Matching
             Port = (ushort)recvData.RemoteEndPoint.Port, RoomID = roomId, UserID = userId
         };
         await MySqlController.Insert(user);
-
-        RedisController.Remove("matching"); // マッチングの権限を削除
         return (true, user);
     }
 }

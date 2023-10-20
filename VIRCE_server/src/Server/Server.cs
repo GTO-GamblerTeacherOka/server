@@ -52,17 +52,17 @@ public static class Server
                         var b = Encoding.UTF8.GetBytes(u.ModelID);
                         var data = h.Concat(b).ToArray();
                         Socket.SendAsync(data, recvData.RemoteEndPoint).Forget(); // send user data to new user
-                    });
+                    }).Forget();
                     UniTask.Run(() =>
                     {
                         var h = DataParser.CreateHeader(DataParser.Flag.DisplayNameData, u.UserID, u.RoomID);
                         var b = Encoding.UTF8.GetBytes(u.DisplayName);
                         var data = h.Concat(b).ToArray();
                         Socket.SendAsync(data, recvData.RemoteEndPoint).Forget(); // send user display name
-                    });
+                    }).Forget();
                     Socket.SendAsync(sendData, new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port)).Forget();
                 }
-            });
+            }).Forget();
         }
         else
         {
@@ -74,7 +74,7 @@ public static class Server
                     var sendEndPoint = new IPEndPoint(IPAddress.Parse(u.IPAddress), u.Port);
                     Socket.SendAsync(recvData.Buffer, sendEndPoint).Forget();
                 }
-            });
+            }).Forget();
 
             switch (flag)
             {
