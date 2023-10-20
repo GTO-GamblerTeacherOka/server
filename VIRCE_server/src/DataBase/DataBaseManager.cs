@@ -1,10 +1,7 @@
-﻿using System.Net;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using MasterMemory;
 using VIRCE_server.Controller;
 using VIRCE_server.MasterMemoryDataBase;
-using VIRCE_server.PacketUtil;
-using VIRCE_server.Server;
 
 namespace VIRCE_server.DataBase;
 
@@ -35,7 +32,7 @@ public static class DataBaseManager
             while (_isStarted)
             {
                 Cache().Forget();
-                var users = _db.UserDataTable.All;
+                /*var users = _db.UserDataTable.All;
                 foreach (var user in users)
                 {
                     var globalUserId = DataParser.GetGlobalUserId(user.UserID, user.RoomID);
@@ -48,7 +45,7 @@ public static class DataBaseManager
                     var data = DataParser.CreateHeader(DataParser.Flag.RoomExit, user.UserID, user.RoomID);
                     Socket.SendAsync(data, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5000)).Forget();
                 }
-
+//*/
                 await Task.Delay(CacheTimeSpan);
             }
         }).Forget();
