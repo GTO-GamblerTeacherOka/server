@@ -1,5 +1,4 @@
 ﻿using DotNetEnv;
-using VIRCE_server.Controller;
 using VIRCE_server.DataBase;
 
 namespace VIRCE_server;
@@ -17,7 +16,7 @@ internal static class VirceServer
     {
         Env.Load("./.env");
         DataBaseManager.Initialize();
-        RedisController.Initialize();
+        // RedisController.Initialize();
         DataBaseManager.Initialize();
     }
 }
