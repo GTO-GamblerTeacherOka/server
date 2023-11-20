@@ -10,9 +10,16 @@ public static class RedisController
 
     public static void Initialize()
     {
-        _redis = ConnectionMultiplexer.Connect(Env.GetString("REDIS_HOST"));
-        _db = _redis.GetDatabase();
-        Remove("matching");
+        try
+        {
+            _redis = ConnectionMultiplexer.Connect(Env.GetString("REDIS_HOST"));
+            _db = _redis.GetDatabase();
+            Remove("matching");
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     public static void SetString(in string key, in string value)

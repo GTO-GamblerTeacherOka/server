@@ -104,7 +104,7 @@ public static class Server
             }
         }
 
-        // SetLateTime(DataParser.GetGlobalUserId(userId, roomId)).Forget();
+        SetLateTime(DataParser.GetGlobalUserId(userId, roomId)).Forget();
     }
 
     private static async UniTask ExitHandler(byte roomId, byte userId)
