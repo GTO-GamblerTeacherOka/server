@@ -21,3 +21,5 @@ internal static class VirceServer
         DataBaseManager.Initialize();
     }
 }
+
+// copyright 2023 Ukai Shota
